@@ -3,7 +3,7 @@ package gzip
 import "testing"
 
 // TestContentTypes tests the content-type regexp that is used as
-// an example in fabio.properties
+// an example in olb.properties
 func TestContentTypes(t *testing.T) {
 	tests := []string{
 		"text/foo",

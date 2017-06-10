@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/fabiolb/fabio/config"
-	"github.com/fabiolb/fabio/route"
+	"github.com/millisecond/olb/config"
+	"github.com/millisecond/olb/route"
 )
 
 func TestGracefulShutdown(t *testing.T) {

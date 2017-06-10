@@ -13,23 +13,17 @@ import (
 	"runtime"
 	"runtime/debug"
 	"strings"
-	"sync"
 	"sync/atomic"
-	"time"
 
-	"github.com/fabiolb/fabio/admin"
-	"github.com/fabiolb/fabio/cert"
-	"github.com/fabiolb/fabio/config"
-	"github.com/fabiolb/fabio/exit"
-	"github.com/fabiolb/fabio/logger"
-	"github.com/fabiolb/fabio/metrics"
-	"github.com/fabiolb/fabio/proxy"
-	"github.com/fabiolb/fabio/proxy/tcp"
-	"github.com/fabiolb/fabio/registry"
-	"github.com/fabiolb/fabio/registry/consul"
-	"github.com/fabiolb/fabio/registry/file"
-	"github.com/fabiolb/fabio/registry/static"
-	"github.com/fabiolb/fabio/route"
+	"github.com/millisecond/olb/admin"
+	"github.com/millisecond/olb/cert"
+	"github.com/millisecond/olb/config"
+	"github.com/millisecond/olb/exit"
+	"github.com/millisecond/olb/logger"
+	"github.com/millisecond/olb/metrics"
+	"github.com/millisecond/olb/proxy"
+	"github.com/millisecond/olb/proxy/tcp"
+	"github.com/millisecond/olb/route"
 	"github.com/pkg/profile"
 	dmp "github.com/sergi/go-diff/diffmatchpatch"
 )
@@ -39,10 +33,10 @@ import (
 // It is set by build/release.sh for tagged releases
 // so that 'go get' just works.
 //
-// It is also set by the linker when fabio
+// It is also set by the linker when olb
 // is built via the Makefile or the build/docker.sh
 // script to ensure the correct version nubmer
-var version = "1.5.0"
+var version = "0.1.0"
 
 var shuttingDown int32
 
@@ -92,17 +86,13 @@ func main() {
 		if prof != nil {
 			prof.Stop()
 		}
-		if registry.Default == nil {
-			return
-		}
-		registry.Default.Deregister()
 	})
 
 	// init metrics early since that create the global metric registries
 	// that are used by other parts of the code.
 	initMetrics(cfg)
 	initRuntime(cfg)
-	initBackend(cfg)
+	initConfigService(cfg)
 	startAdmin(cfg)
 
 	first := make(chan bool)
@@ -301,76 +291,72 @@ func initRuntime(cfg *config.Config) {
 	}
 }
 
-func initBackend(cfg *config.Config) {
-	var deadline = time.Now().Add(cfg.Registry.Timeout)
-
-	var err error
-	for {
-		switch cfg.Registry.Backend {
-		case "file":
-			registry.Default, err = file.NewBackend(cfg.Registry.File.Path)
-		case "static":
-			registry.Default, err = static.NewBackend(cfg.Registry.Static.Routes)
-		case "consul":
-			registry.Default, err = consul.NewBackend(&cfg.Registry.Consul)
-		default:
-			exit.Fatal("[FATAL] Unknown registry backend ", cfg.Registry.Backend)
-		}
-
-		if err == nil {
-			if err = registry.Default.Register(); err == nil {
-				return
-			}
-		}
-		log.Print("[WARN] Error initializing backend. ", err)
-
-		if time.Now().After(deadline) {
-			exit.Fatal("[FATAL] Timeout registering backend.")
-		}
-
-		time.Sleep(cfg.Registry.Retry)
-		if atomic.LoadInt32(&shuttingDown) > 0 {
-			exit.Exit(1)
-		}
-	}
+func initConfigService(cfg *config.Config) {
+	//var deadline = time.Now().Add(cfg.Registry.Timeout)
+	//
+	//var err error
+	//for {
+	//	switch cfg.Registry.Backend {
+	//	case "file":
+	//		registry.Default, err = file.NewBackend(cfg.Registry.File.Path)
+	//	default:
+	//		exit.Fatal("[FATAL] Unknown registry backend ", cfg.Registry.Backend)
+	//	}
+	//
+	//	if err == nil {
+	//		if err = registry.Default.Register(); err == nil {
+	//			return
+	//		}
+	//	}
+	//	log.Print("[WARN] Error initializing backend. ", err)
+	//
+	//	if time.Now().After(deadline) {
+	//		exit.Fatal("[FATAL] Timeout registering backend.")
+	//	}
+	//
+	//	time.Sleep(cfg.Registry.Retry)
+	//	if atomic.LoadInt32(&shuttingDown) > 0 {
+	//		exit.Exit(1)
+	//	}
+	//}
 }
 
 func watchBackend(cfg *config.Config, first chan bool) {
-	var (
-		last   string
-		svccfg string
-		mancfg string
-
-		once sync.Once
-	)
-
-	svc := registry.Default.WatchServices()
-	man := registry.Default.WatchManual()
-
-	for {
-		select {
-		case svccfg = <-svc:
-		case mancfg = <-man:
-		}
-
-		// manual config overrides service config
-		// order matters
-		next := svccfg + "\n" + mancfg
-		if next == last {
-			continue
-		}
-
-		t, err := route.NewTable(next)
-		if err != nil {
-			log.Printf("[WARN] %s", err)
-			continue
-		}
-		route.SetTable(t)
-		logRoutes(last, next, cfg.Log.RoutesFormat)
-		last = next
-
-		once.Do(func() { close(first) })
-	}
+	//var (
+	//	last   string
+	//	svccfg string
+	//	mancfg string
+	//
+	//	once sync.Once
+	//)
+	//
+	//svc := registry.Default.WatchServices()
+	//man := registry.Default.WatchManual()
+	//
+	//for {
+	//	select {
+	//	case svccfg = <-svc:
+	//	case mancfg = <-man:
+	//	}
+	//
+	//	// manual config overrides service config
+	//	// order matters
+	//	next := svccfg + "\n" + mancfg
+	//	if next == last {
+	//		continue
+	//	}
+	//
+	//	t, err := route.NewTable(next)
+	//	if err != nil {
+	//		log.Printf("[WARN] %s", err)
+	//		continue
+	//	}
+	//	route.SetTable(t)
+	//	logRoutes(last, next, cfg.Log.RoutesFormat)
+	//	last = next
+	//
+	//	once.Do(func() { close(first) })
+	//}
 }
 
 func logRoutes(last, next, format string) {

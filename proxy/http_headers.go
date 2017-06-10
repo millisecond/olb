@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/fabiolb/fabio/config"
+	"github.com/millisecond/olb/config"
 )
 
 // addHeaders adds/updates headers in request

@@ -1,6 +1,6 @@
 FROM scratch
 ADD build/ca-certificates.crt /etc/ssl/certs/
-ADD fabio.properties /etc/fabio/fabio.properties
-ADD fabio /
+ADD olb.properties /etc/olb/olb.properties
+ADD olb /
 EXPOSE 9998 9999
-CMD ["/fabio", "-cfg", "/etc/fabio/fabio.properties"]
+CMD ["/olb", "-cfg", "/etc/olb/olb.properties"]

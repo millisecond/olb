@@ -10,12 +10,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fabiolb/fabio/config"
-	"github.com/fabiolb/fabio/logger"
-	"github.com/fabiolb/fabio/metrics"
-	"github.com/fabiolb/fabio/proxy/gzip"
-	"github.com/fabiolb/fabio/route"
-	"github.com/fabiolb/fabio/uuid"
+	"github.com/millisecond/olb/config"
+	"github.com/millisecond/olb/logger"
+	"github.com/millisecond/olb/metrics"
+	"github.com/millisecond/olb/proxy/gzip"
+	"github.com/millisecond/olb/route"
+	"github.com/millisecond/olb/uuid"
 )
 
 // HTTPProxy is a dynamic reverse proxy for HTTP and HTTPS protocols.

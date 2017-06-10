@@ -41,7 +41,7 @@ resource "aws_security_group" "elb" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # fabio admin access from anywhere
+  # olb admin access from anywhere
   ingress {
     from_port   = 9998
     to_port     = 9998
@@ -61,7 +61,7 @@ resource "aws_security_group" "elb" {
 # Our default security group to access
 # the instances over SSH and HTTP
 resource "aws_security_group" "default" {
-  name        = "fabio_example"
+  name        = "olb_example"
   description = "Used in the terraform"
   vpc_id      = "${aws_vpc.default.id}"
 
@@ -100,7 +100,7 @@ resource "aws_security_group" "default" {
 
 
 resource "aws_elb" "web" {
-  name = "fabio-example-elb"
+  name = "olb-example-elb"
 
   subnets         = ["${aws_subnet.default.id}"]
   security_groups = ["${aws_security_group.elb.id}"]
@@ -166,9 +166,7 @@ resource "aws_instance" "web" {
     inline = [
       "sudo apt-get -y update",
       "sudo apt-get -y install unzip",
-      "wget https://releases.hashicorp.com/consul/0.6.4/consul_0.6.4_linux_amd64.zip",
-      "wget https://github.com/fabiolb/fabio/releases/download/v1.1.2/fabio-1.1.2-go1.6.2_linux-amd64",
-      "unzip consul*.zip"
+      "wget https://github.com/millisecond/olb/releases/download/v1.1.2/olb-1.1.2-go1.6.2_linux-amd64",
     ]
   }
 }

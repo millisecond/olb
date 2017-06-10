@@ -12,12 +12,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/fabiolb/fabio/cert"
-	"github.com/fabiolb/fabio/config"
-	"github.com/fabiolb/fabio/proxy/internal"
-	"github.com/fabiolb/fabio/proxy/tcp"
-	"github.com/fabiolb/fabio/proxy/tcp/tcptest"
-	"github.com/fabiolb/fabio/route"
+	"github.com/millisecond/olb/cert"
+	"github.com/millisecond/olb/config"
+	"github.com/millisecond/olb/proxy/internal"
+	"github.com/millisecond/olb/proxy/tcp"
+	"github.com/millisecond/olb/proxy/tcp/tcptest"
+	"github.com/millisecond/olb/route"
 )
 
 var echoHandler tcp.HandlerFunc = func(c net.Conn) error {
@@ -72,7 +72,7 @@ func TestTCPProxyWithTLS(t *testing.T) {
 	defer srv.Close()
 
 	// setup cert source
-	dir, err := ioutil.TempDir("", "fabio")
+	dir, err := ioutil.TempDir("", "olb")
 	if err != nil {
 		t.Fatal("ioutil.TempDir", err)
 	}

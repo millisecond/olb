@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/fabiolb/fabio/config"
+	"github.com/millisecond/olb/config"
 )
 
 func TestRegistry(t *testing.T) {

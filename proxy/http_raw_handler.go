@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/fabiolb/fabio/metrics"
+	"github.com/millisecond/olb/metrics"
 )
 
 // conn measures the number of open web socket connections

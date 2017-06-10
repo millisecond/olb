@@ -9,7 +9,7 @@ import (
 	"time"
 
 	cgm "github.com/circonus-labs/circonus-gometrics"
-	"github.com/fabiolb/fabio/config"
+	"github.com/millisecond/olb/config"
 )
 
 var (
@@ -17,7 +17,7 @@ var (
 	once     sync.Once
 )
 
-const serviceName = "fabio"
+const serviceName = "olb"
 
 // circonusRegistry returns a provider that reports to Circonus.
 func circonusRegistry(prefix string, circ config.Circonus, interval time.Duration) (Registry, error) {

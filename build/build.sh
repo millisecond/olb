@@ -12,9 +12,9 @@ fi
 
 go get -u github.com/mitchellh/gox
 for go in go1.8.3; do
-	echo "Building fabio with ${go}"
-	gox -gocmd ~/${go}/bin/go -tags netgo -output "${basedir}/build/builds/fabio-${v}/fabio-${v}-${go}-{{.OS}}_{{.Arch}}"
+	echo "Building olb with ${go}"
+	gox -gocmd ~/${go}/bin/go -tags netgo -output "${basedir}/build/builds/olb-${v}/olb-${v}-${go}-{{.OS}}_{{.Arch}}"
 done
 
-( cd ${basedir}/build/builds/fabio-${v} && shasum -a 256 fabio-${v}-* > fabio-${v}.sha256 )
-( cd ${basedir}/build/builds/fabio-${v} && gpg2 --output fabio-${v}.sha256.sig --detach-sig fabio-${v}.sha256 )
+( cd ${basedir}/build/builds/olb-${v} && shasum -a 256 olb-${v}-* > olb-${v}.sha256 )
+( cd ${basedir}/build/builds/olb-${v} && gpg2 --output olb-${v}.sha256.sig --detach-sig olb-${v}.sha256 )

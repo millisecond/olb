@@ -36,7 +36,7 @@ func TestAdminServerAccess(t *testing.T) {
 	}
 
 	roTests := []test{
-		{"/api/manual", 403},
+		//{"/api/manual", 403},
 		{"/api/config", 200},
 		{"/api/routes", 200},
 		{"/api/version", 200},
@@ -48,7 +48,7 @@ func TestAdminServerAccess(t *testing.T) {
 	}
 
 	rwTests := []test{
-		{"/api/manual", 200},
+		//{"/api/manual", 200},
 		{"/api/config", 200},
 		{"/api/routes", 200},
 		{"/api/version", 200},

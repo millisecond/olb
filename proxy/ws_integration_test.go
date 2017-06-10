@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/fabiolb/fabio/config"
-	"github.com/fabiolb/fabio/route"
+	"github.com/millisecond/olb/config"
+	"github.com/millisecond/olb/route"
 
 	"golang.org/x/net/websocket"
 )

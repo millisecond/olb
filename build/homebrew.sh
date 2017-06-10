@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# homebrew.sh creates an updated homebrew on fabio
+# homebrew.sh creates an updated homebrew on olb
 
 set -o nounset
 set -o errexit
@@ -15,19 +15,21 @@ if [[ -z "$v" ]] ; then
 	exit 1
 fi
 
-srcurl=https://github.com/fabiolb/fabio/archive/v${v}.tar.gz
+srcurl=https://github.com/millisecond/olb/archive/v${v}.tar.gz
 shasum=$(wget -O- -q "$srcurl" | shasum -a 256 | awk '{ print $1; }')
-echo -e "/urlDAurl \"$srcurl\"/sha256DAsha256 \"$shasum\":wq" > $prgdir/homebrew.vim
+echo -e "/url
+DAurl \"$srcurl\"/sha256
+DAsha256 \"$shasum\":wq" > $prgdir/homebrew.vim
 
 brew update
 brew update
 (
 	cd $brewdir
-	git checkout -b fabio-$v origin/master
-	vim -u NONE -s $prgdir/homebrew.vim $brewdir/Formula/fabio.rb
-	git add Formula/fabio.rb
-	git commit -m "fabio $v"
-	git push --set-upstream magiconair fabio-$v
+	git checkout -b olb-$v origin/master
+	vim -u NONE -s $prgdir/homebrew.vim $brewdir/Formula/olb.rb
+	git add Formula/olb.rb
+	git commit -m "olb $v"
+	git push --set-upstream magiconair olb-$v
 )
 
 echo "Goto https://github.com/Homebrew/homebrew-core to create pull request"

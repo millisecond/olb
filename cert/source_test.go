@@ -24,8 +24,7 @@ import (
 
 	"golang.org/x/net/http2"
 
-	"github.com/fabiolb/fabio/config"
-	consulapi "github.com/hashicorp/consul/api"
+	"github.com/millisecond/olb/config"
 	vaultapi "github.com/hashicorp/vault/api"
 	"github.com/pascaldekloe/goe/verify"
 )
@@ -128,15 +127,6 @@ func TestNewSource(t *testing.T) {
 			},
 		},
 		{
-			desc: "consul",
-			cfg:  certsource("consul"),
-			src: ConsulSource{
-				CertURL:     "cert",
-				ClientCAURL: "clientca",
-				CAUpgradeCN: "upgcn",
-			},
-		},
-		{
 			desc: "vault",
 			cfg:  certsource("vault"),
 			src: &VaultSource{
@@ -220,76 +210,6 @@ func TestHTTPSource(t *testing.T) {
 	testSource(t, HTTPSource{CertURL: srv.URL + "/list"}, makeCertPool(certPEM), 500*time.Millisecond)
 }
 
-func TestConsulSource(t *testing.T) {
-	const certURL = "http://127.0.0.1:8500/v1/kv/fabio/test/consul-server"
-
-	// run a consul server if it isn't already running
-	_, err := http.Get("http://127.0.0.1:8500/v1/status/leader")
-	if err != nil {
-		consul := os.Getenv("CONSUL_EXE")
-		if consul == "" {
-			consul = "consul"
-		}
-
-		version, err := exec.Command(consul, "--version").Output()
-		if err != nil {
-			t.Fatalf("Failed to run %s --version", consul)
-		}
-		cr := bytes.IndexRune(version, '\n')
-		t.Logf("Starting %s: %s", consul, string(version[:cr]))
-
-		start := time.Now()
-		cmd := exec.Command(consul, "agent", "-bind", "127.0.0.1", "-server", "-dev")
-		if err := cmd.Start(); err != nil {
-			t.Fatalf("Failed to start consul server. %s", err)
-		}
-		defer cmd.Process.Kill()
-
-		isUp := func() bool {
-			resp, err := http.Get("http://127.0.0.1:8500/v1/status/leader")
-			// /v1/status/leader returns '\n""' while consul is in leader election mode
-			// and '"127.0.0.1:8300"' when not. So we punt by checking the
-			// Content-Length header instead of the actual body content :)
-			return err == nil && resp.StatusCode == 200 && resp.ContentLength > 10
-		}
-
-		// We need give consul ~8-10 seconds to become ready until I've
-		// figured out whether we can speed this up. Make sure that this is
-		// less than the global test timeout in Makefile.
-		if !waitFor(12*time.Second, isUp) {
-			t.Fatal("Timeout waiting for consul server after %2.1f seconds", time.Since(start).Seconds())
-		}
-		t.Logf("Consul is ready after %2.1f seconds", time.Since(start).Seconds())
-	} else {
-		t.Log("Using existing consul server")
-	}
-
-	config, key, err := parseConsulURL(certURL)
-	if err != nil {
-		t.Fatalf("Failed to parse consul url: %s", err)
-	}
-
-	client, err := consulapi.NewClient(config)
-	if err != nil {
-		t.Fatalf("Failed to create consul client: %s", err)
-	}
-	defer func() { client.KV().DeleteTree(key, &consulapi.WriteOptions{}) }()
-
-	write := func(name string, value []byte) {
-		p := &consulapi.KVPair{Key: key + "/" + name, Value: value}
-		_, err := client.KV().Put(p, &consulapi.WriteOptions{})
-		if err != nil {
-			t.Fatalf("Failed to write %q to consul: %s", p.Key, err)
-		}
-	}
-
-	certPEM, keyPEM := makePEM("localhost", time.Minute)
-	write("localhost-cert.pem", certPEM)
-	write("localhost-key.pem", keyPEM)
-
-	testSource(t, ConsulSource{CertURL: certURL}, makeCertPool(certPEM), 500*time.Millisecond)
-}
-
 // vaultServer starts a vault server in dev mode and waits until is ready.
 func vaultServer(t *testing.T, addr, rootToken string) (*exec.Cmd, *vaultapi.Client) {
 	vault := os.Getenv("VAULT_EXE")
@@ -325,16 +245,16 @@ func vaultServer(t *testing.T, addr, rootToken string) (*exec.Cmd, *vaultapi.Cli
 	}
 
 	policy := `
-	path "secret/fabio/cert" {
+	path "secret/olb/cert" {
 	  capabilities = ["list"]
 	}
 
-	path "secret/fabio/cert/*" {
+	path "secret/olb/cert/*" {
 	  capabilities = ["read"]
 	}
 	`
 
-	if err := c.Sys().PutPolicy("fabio", policy); err != nil {
+	if err := c.Sys().PutPolicy("olb", policy); err != nil {
 		cmd.Process.Kill()
 		t.Fatalf("Could not create policy: %s", err)
 	}
@@ -364,83 +284,83 @@ func makeToken(t *testing.T, c *vaultapi.Client, wrapTTL string, req *vaultapi.T
 	return resp.Auth.ClientToken
 }
 
-func TestVaultSource(t *testing.T) {
-	const (
-		addr      = "127.0.0.1:58421"
-		rootToken = "token"
-		certPath  = "secret/fabio/cert"
-	)
-
-	// start a vault server
-	vault, client := vaultServer(t, addr, rootToken)
-	defer vault.Process.Kill()
-
-	// create a cert and store it in vault
-	certPEM, keyPEM := makePEM("localhost", time.Minute)
-	data := map[string]interface{}{"cert": string(certPEM), "key": string(keyPEM)}
-	if _, err := client.Logical().Write(certPath+"/localhost", data); err != nil {
-		t.Fatalf("logical.Write failed: %s", err)
-	}
-
-	newBool := func(b bool) *bool { return &b }
-
-	// run tests
-	tests := []struct {
-		desc    string
-		wrapTTL string
-		req     *vaultapi.TokenCreateRequest
-		dropErr bool
-	}{
-		{
-			desc: "renewable token",
-			req:  &vaultapi.TokenCreateRequest{Lease: "1m", TTL: "1m", Policies: []string{"fabio"}},
-		},
-		{
-			desc:    "non-renewable token",
-			req:     &vaultapi.TokenCreateRequest{Lease: "1m", TTL: "1m", Renewable: newBool(false), Policies: []string{"fabio"}},
-			dropErr: true,
-		},
-		{
-			desc: "renewable orphan token",
-			req:  &vaultapi.TokenCreateRequest{Lease: "1m", TTL: "1m", NoParent: true, Policies: []string{"fabio"}},
-		},
-		{
-			desc:    "non-renewable orphan token",
-			req:     &vaultapi.TokenCreateRequest{Lease: "1m", TTL: "1m", NoParent: true, Renewable: newBool(false), Policies: []string{"fabio"}},
-			dropErr: true,
-		},
-		{
-			desc:    "renewable wrapped token",
-			wrapTTL: "10s",
-			req:     &vaultapi.TokenCreateRequest{Lease: "1m", TTL: "1m", Policies: []string{"fabio"}},
-		},
-		{
-			desc:    "non-renewable wrapped token",
-			wrapTTL: "10s",
-			req:     &vaultapi.TokenCreateRequest{Lease: "1m", TTL: "1m", Renewable: newBool(false), Policies: []string{"fabio"}},
-			dropErr: true,
-		},
-	}
-
-	pool := makeCertPool(certPEM)
-	timeout := 500 * time.Millisecond
-	for _, tt := range tests {
-		tt := tt // capture loop var
-		t.Run(tt.desc, func(t *testing.T) {
-			src := &VaultSource{
-				Addr:       "http://" + addr,
-				CertPath:   certPath,
-				vaultToken: makeToken(t, client, tt.wrapTTL, tt.req),
-			}
-
-			// suppress the log warning about a non-renewable lease
-			// since this is the expected behavior.
-			dropNotRenewableError = tt.dropErr
-			testSource(t, src, pool, timeout)
-			dropNotRenewableError = false
-		})
-	}
-}
+//func TestVaultSource(t *testing.T) {
+//	const (
+//		addr      = "127.0.0.1:58421"
+//		rootToken = "token"
+//		certPath  = "secret/olb/cert"
+//	)
+//
+//	// start a vault server
+//	vault, client := vaultServer(t, addr, rootToken)
+//	defer vault.Process.Kill()
+//
+//	// create a cert and store it in vault
+//	certPEM, keyPEM := makePEM("localhost", time.Minute)
+//	data := map[string]interface{}{"cert": string(certPEM), "key": string(keyPEM)}
+//	if _, err := client.Logical().Write(certPath+"/localhost", data); err != nil {
+//		t.Fatalf("logical.Write failed: %s", err)
+//	}
+//
+//	newBool := func(b bool) *bool { return &b }
+//
+//	// run tests
+//	tests := []struct {
+//		desc    string
+//		wrapTTL string
+//		req     *vaultapi.TokenCreateRequest
+//		dropErr bool
+//	}{
+//		{
+//			desc: "renewable token",
+//			req:  &vaultapi.TokenCreateRequest{Lease: "1m", TTL: "1m", Policies: []string{"olb"}},
+//		},
+//		{
+//			desc:    "non-renewable token",
+//			req:     &vaultapi.TokenCreateRequest{Lease: "1m", TTL: "1m", Renewable: newBool(false), Policies: []string{"olb"}},
+//			dropErr: true,
+//		},
+//		{
+//			desc: "renewable orphan token",
+//			req:  &vaultapi.TokenCreateRequest{Lease: "1m", TTL: "1m", NoParent: true, Policies: []string{"olb"}},
+//		},
+//		{
+//			desc:    "non-renewable orphan token",
+//			req:     &vaultapi.TokenCreateRequest{Lease: "1m", TTL: "1m", NoParent: true, Renewable: newBool(false), Policies: []string{"olb"}},
+//			dropErr: true,
+//		},
+//		{
+//			desc:    "renewable wrapped token",
+//			wrapTTL: "10s",
+//			req:     &vaultapi.TokenCreateRequest{Lease: "1m", TTL: "1m", Policies: []string{"olb"}},
+//		},
+//		{
+//			desc:    "non-renewable wrapped token",
+//			wrapTTL: "10s",
+//			req:     &vaultapi.TokenCreateRequest{Lease: "1m", TTL: "1m", Renewable: newBool(false), Policies: []string{"olb"}},
+//			dropErr: true,
+//		},
+//	}
+//
+//	pool := makeCertPool(certPEM)
+//	timeout := 500 * time.Millisecond
+//	for _, tt := range tests {
+//		tt := tt // capture loop var
+//		t.Run(tt.desc, func(t *testing.T) {
+//			src := &VaultSource{
+//				Addr:       "http://" + addr,
+//				CertPath:   certPath,
+//				vaultToken: makeToken(t, client, tt.wrapTTL, tt.req),
+//			}
+//
+//			// suppress the log warning about a non-renewable lease
+//			// since this is the expected behavior.
+//			dropNotRenewableError = tt.dropErr
+//			testSource(t, src, pool, timeout)
+//			dropNotRenewableError = false
+//		})
+//	}
+//}
 
 // testSource runs an integration test by making an HTTPS request
 // to https://localhost/ expecting that the source provides a valid
@@ -563,7 +483,7 @@ func http20Client(rootCAs *x509.CertPool) (*http.Client, error) {
 }
 
 func tempDir() string {
-	dir, err := ioutil.TempDir("", "fabio")
+	dir, err := ioutil.TempDir("", "olb")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -603,7 +523,7 @@ func makePEM(host string, validFor time.Duration) (certPEM, keyPEM []byte) {
 	template := x509.Certificate{
 		SerialNumber: big.NewInt(1),
 		Subject: pkix.Name{
-			Organization: []string{"Fabio Co"},
+			Organization: []string{"OLB Co"},
 		},
 		NotBefore:             time.Now(),
 		NotAfter:              time.Now().Add(validFor),

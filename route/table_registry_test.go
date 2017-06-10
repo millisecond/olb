@@ -5,7 +5,7 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/fabiolb/fabio/metrics"
+	"github.com/millisecond/olb/metrics"
 )
 
 func TestSyncRegistry(t *testing.T) {

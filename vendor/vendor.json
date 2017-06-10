@@ -45,14 +45,6 @@
 			"revisionTime": "2016-06-01T09:31:17Z"
 		},
 		{
-			"checksumSHA1": "GsJ84gKbQno8KbojhVTgSVWNues=",
-			"path": "github.com/hashicorp/consul/api",
-			"revision": "402636ff2db998edef392ac6d59210d2170b3ebf",
-			"revisionTime": "2017-04-05T04:22:14Z",
-			"version": "v0.8.0",
-			"versionExact": "v0.8.0"
-		},
-		{
 			"checksumSHA1": "cdOCt0Yb+hdErz8NAQqayxPmRsY=",
 			"path": "github.com/hashicorp/errwrap",
 			"revision": "7554cd9344cec97297fa6649b055a8c98c2a1e55",
@@ -243,5 +235,5 @@
 			"revisionTime": "2015-10-20T22:50:55Z"
 		}
 	],
-	"rootPath": "github.com/fabiolb/fabio"
+	"rootPath": "github.com/millisecond/olb"
 }

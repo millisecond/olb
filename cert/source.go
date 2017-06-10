@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/fabiolb/fabio/config"
+	"github.com/millisecond/olb/config"
 )
 
 // Source provides the interface for dynamic certificate sources.
@@ -47,13 +47,6 @@ func NewSource(cfg config.CertSource) (Source, error) {
 			ClientCAURL: cfg.ClientCAPath,
 			CAUpgradeCN: cfg.CAUpgradeCN,
 			Refresh:     cfg.Refresh,
-		}, nil
-
-	case "consul":
-		return ConsulSource{
-			CertURL:     cfg.CertPath,
-			ClientCAURL: cfg.ClientCAPath,
-			CAUpgradeCN: cfg.CAUpgradeCN,
 		}, nil
 
 	case "vault":

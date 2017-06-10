@@ -5,7 +5,7 @@ import (
 	"crypto/x509"
 	"io/ioutil"
 
-	"github.com/fabiolb/fabio/exit"
+	"github.com/millisecond/olb/exit"
 )
 
 // FileSource implements a certificate source for one

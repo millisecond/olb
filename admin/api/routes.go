@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/fabiolb/fabio/route"
+	"github.com/millisecond/olb/route"
 )
 
 type RoutesHandler struct{}

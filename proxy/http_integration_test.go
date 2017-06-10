@@ -18,10 +18,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/fabiolb/fabio/config"
-	"github.com/fabiolb/fabio/logger"
-	"github.com/fabiolb/fabio/proxy/internal"
-	"github.com/fabiolb/fabio/route"
+	"github.com/millisecond/olb/config"
+	"github.com/millisecond/olb/logger"
+	"github.com/millisecond/olb/proxy/internal"
+	"github.com/millisecond/olb/route"
 	"github.com/pascaldekloe/goe/verify"
 )
 

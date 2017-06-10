@@ -15,7 +15,7 @@ help:
 	@echo "release   - build/release.sh"
 	@echo "homebrew  - build/homebrew.sh"
 	@echo "buildpkg  - build/build.sh"
-	@echo "pkg       - build, test and create pkg/fabio.tar.gz"
+	@echo "pkg       - build, test and create pkg/olb.tar.gz"
 	@echo "clean     - remove temp files"
 
 build: checkdeps
@@ -24,6 +24,11 @@ build: checkdeps
 
 test: checkdeps
 	$(GO) test -v -test.timeout 15s `go list ./... | grep -v '/vendor/'`
+	@if [ $$? -eq 0 ] ; then \
+	    echo "All tests PASSED" ; \
+    else \
+	    echo "Tests FAILED" ; \
+	fi
 
 checkdeps:
 	[ -x "$(GOVENDOR)" ] || $(GO) get -u github.com/kardianos/govendor
@@ -41,7 +46,7 @@ install:
 pkg: build test
 	rm -rf pkg
 	mkdir pkg
-	tar czf pkg/fabio.tar.gz fabio
+	tar czf pkg/olb.tar.gz olb
 
 release: test
 	build/release.sh
@@ -52,21 +57,17 @@ homebrew:
 codeship:
 	go version
 	go env
-	wget -O ~/consul.zip https://releases.hashicorp.com/consul/0.8.3/consul_0.8.3_linux_amd64.zip
-	wget -O ~/vault.zip https://releases.hashicorp.com/vault/0.6.5/vault_0.6.5_linux_amd64.zip
-	unzip -o -d ~/bin ~/consul.zip
 	unzip -o -d ~/bin ~/vault.zip
 	vault --version
-	consul --version
-	cd ~/src/github.com/fabiolb/fabio && make test
+	cd ~/src/github.com/millisecond/olb && make test
 
-fabio-builder: make-fabio-builder push-fabio-builder
+olb-builder: make-olb-builder push-olb-builder
 
-make-fabio-builder:
-	docker build -t fabiolb/fabio-builder --squash build/fabio-builder
+make-olb-builder:
+	docker build -t olblb/olb-builder --squash build/olb-builder
 
-push-fabio-builder:
-	docker push fabiolb/fabio-builder
+push-olb-builder:
+	docker push olblb/olb-builder
 
 buildpkg: test
 	build/build.sh

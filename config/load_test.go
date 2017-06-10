@@ -155,15 +155,6 @@ func TestLoad(t *testing.T) {
 			},
 		},
 		{
-			desc: "-proxy.addr with consul cert source",
-			args: []string{"-proxy.addr", ":5555;cs=name", "-proxy.cs", "cs=name;type=consul;cert=value"},
-			cfg: func(cfg *Config) *Config {
-				cfg.Listen = []Listen{Listen{Addr: ":5555", Proto: "https"}}
-				cfg.Listen[0].CertSource = CertSource{Name: "name", Type: "consul", CertPath: "value", Refresh: 3 * time.Second}
-				return cfg
-			},
-		},
-		{
 			desc: "-proxy.addr with vault cert source",
 			args: []string{"-proxy.addr", ":5555;cs=name", "-proxy.cs", "cs=name;type=vault;cert=value"},
 			cfg: func(cfg *Config) *Config {
@@ -394,115 +385,6 @@ func TestLoad(t *testing.T) {
 			},
 		},
 		{
-			args: []string{"-registry.consul.addr", "1.2.3.4:5555"},
-			cfg: func(cfg *Config) *Config {
-				cfg.Registry.Consul.Addr = "1.2.3.4:5555"
-				cfg.Registry.Consul.Scheme = "http"
-				return cfg
-			},
-		},
-		{
-			args: []string{"-registry.consul.addr", "http://1.2.3.4:5555/"},
-			cfg: func(cfg *Config) *Config {
-				cfg.Registry.Consul.Addr = "1.2.3.4:5555"
-				cfg.Registry.Consul.Scheme = "http"
-				return cfg
-			},
-		},
-		{
-			args: []string{"-registry.consul.addr", "https://1.2.3.4:5555/"},
-			cfg: func(cfg *Config) *Config {
-				cfg.Registry.Consul.Addr = "1.2.3.4:5555"
-				cfg.Registry.Consul.Scheme = "https"
-				return cfg
-			},
-		},
-		{
-			args: []string{"-registry.consul.addr", "HTTPS://1.2.3.4:5555/"},
-			cfg: func(cfg *Config) *Config {
-				cfg.Registry.Consul.Addr = "1.2.3.4:5555"
-				cfg.Registry.Consul.Scheme = "https"
-				return cfg
-			},
-		},
-		{
-			args: []string{"-registry.consul.token", "some-token"},
-			cfg: func(cfg *Config) *Config {
-				cfg.Registry.Consul.Token = "some-token"
-				return cfg
-			},
-		},
-		{
-			args: []string{"-registry.consul.kvpath", "/some/path"},
-			cfg: func(cfg *Config) *Config {
-				cfg.Registry.Consul.KVPath = "/some/path"
-				return cfg
-			},
-		},
-		{
-			args: []string{"-registry.consul.tagprefix", "p-"},
-			cfg: func(cfg *Config) *Config {
-				cfg.Registry.Consul.TagPrefix = "p-"
-				return cfg
-			},
-		},
-		{
-			args: []string{"-registry.consul.register.enabled=false"},
-			cfg: func(cfg *Config) *Config {
-				cfg.Registry.Consul.Register = false
-				return cfg
-			},
-		},
-		{
-			args: []string{"-registry.consul.register.addr", "1.2.3.4:5555"},
-			cfg: func(cfg *Config) *Config {
-				cfg.Registry.Consul.ServiceAddr = "1.2.3.4:5555"
-				return cfg
-			},
-		},
-		{
-			args: []string{"-registry.consul.register.name", "fab"},
-			cfg: func(cfg *Config) *Config {
-				cfg.Registry.Consul.ServiceName = "fab"
-				return cfg
-			},
-		},
-		{
-			args: []string{"-registry.consul.register.checkTLSSkipVerify=true"},
-			cfg: func(cfg *Config) *Config {
-				cfg.Registry.Consul.CheckTLSSkipVerify = true
-				return cfg
-			},
-		},
-		{
-			args: []string{"-registry.consul.register.tags", "a, b, c, "},
-			cfg: func(cfg *Config) *Config {
-				cfg.Registry.Consul.ServiceTags = []string{"a", "b", "c"}
-				return cfg
-			},
-		},
-		{
-			args: []string{"-registry.consul.register.checkInterval", "5ms"},
-			cfg: func(cfg *Config) *Config {
-				cfg.Registry.Consul.CheckInterval = 5 * time.Millisecond
-				return cfg
-			},
-		},
-		{
-			args: []string{"-registry.consul.register.checkTimeout", "5ms"},
-			cfg: func(cfg *Config) *Config {
-				cfg.Registry.Consul.CheckTimeout = 5 * time.Millisecond
-				return cfg
-			},
-		},
-		{
-			args: []string{"-registry.consul.service.status", "a, b, "},
-			cfg: func(cfg *Config) *Config {
-				cfg.Registry.Consul.ServiceStatus = []string{"a", "b"}
-				return cfg
-			},
-		},
-		{
 			args: []string{"-log.access.format", "foobar"},
 			cfg: func(cfg *Config) *Config {
 				cfg.Log.AccessFormat = "foobar"
@@ -644,7 +526,6 @@ func TestLoad(t *testing.T) {
 				cfg.UI.Listen.CertSource.Name = "ui"
 				cfg.UI.Listen.CertSource.Type = "file"
 				cfg.UI.Listen.CertSource.CertPath = "value"
-				cfg.Registry.Consul.CheckScheme = "https"
 				return cfg
 			},
 		},
@@ -667,16 +548,15 @@ func TestLoad(t *testing.T) {
 			args: []string{"-aws.apigw.cert.cn", "value"},
 			cfg:  func(cfg *Config) *Config { return cfg },
 		},
-
 		// config file
-		{
-			desc:    "config from environ",
-			environ: []string{"FABIO_proxy_addr=:6666"},
-			cfg: func(cfg *Config) *Config {
-				cfg.Listen = []Listen{{Addr: ":6666", Proto: "http"}}
-				return cfg
-			},
-		},
+		//{
+		//	desc:    "config from environ",
+		//	environ: []string{"FABIO_proxy_addr=:6666"},
+		//	cfg: func(cfg *Config) *Config {
+		//		cfg.Listen = []Listen{{Addr: ":6666", Proto: "http"}}
+		//		return cfg
+		//	},
+		//},
 		{
 			desc: "config from url",
 			args: []string{"-cfg", "URL"},
@@ -689,8 +569,8 @@ func TestLoad(t *testing.T) {
 		},
 		{
 			desc: "config from file I",
-			args: []string{"-cfg", "/tmp/fabio-config-test"},
-			path: "/tmp/fabio-config-test",
+			args: []string{"-cfg", "/tmp/olb-config-test"},
+			path: "/tmp/olb-config-test",
 			data: "proxy.addr = :5555",
 			cfg: func(cfg *Config) *Config {
 				cfg.Listen = []Listen{{Addr: ":5555", Proto: "http"}}
@@ -699,8 +579,8 @@ func TestLoad(t *testing.T) {
 		},
 		{
 			desc: "config from file II",
-			args: []string{"-cfg=/tmp/fabio-config-test"},
-			path: "/tmp/fabio-config-test",
+			args: []string{"-cfg=/tmp/olb-config-test"},
+			path: "/tmp/olb-config-test",
 			data: "proxy.addr = :5555",
 			cfg: func(cfg *Config) *Config {
 				cfg.Listen = []Listen{{Addr: ":5555", Proto: "http"}}
@@ -709,8 +589,8 @@ func TestLoad(t *testing.T) {
 		},
 		{
 			desc: "config from file III",
-			args: []string{"-cfg='/tmp/fabio-config-test'"},
-			path: "/tmp/fabio-config-test",
+			args: []string{"-cfg='/tmp/olb-config-test'"},
+			path: "/tmp/olb-config-test",
 			data: "proxy.addr = :5555",
 			cfg: func(cfg *Config) *Config {
 				cfg.Listen = []Listen{{Addr: ":5555", Proto: "http"}}
@@ -719,8 +599,8 @@ func TestLoad(t *testing.T) {
 		},
 		{
 			desc: "config from file IV",
-			args: []string{"-cfg=\"/tmp/fabio-config-test\""},
-			path: "/tmp/fabio-config-test",
+			args: []string{"-cfg=\"/tmp/olb-config-test\""},
+			path: "/tmp/olb-config-test",
 			data: "proxy.addr = :5555",
 			cfg: func(cfg *Config) *Config {
 				cfg.Listen = []Listen{{Addr: ":5555", Proto: "http"}}
@@ -731,8 +611,8 @@ func TestLoad(t *testing.T) {
 		// precedence rules
 		{
 			desc: "cmdline over config file I",
-			args: []string{"-cfg", "/tmp/fabio-config-test", "-proxy.addr", ":6666"},
-			path: "/tmp/fabio-config-test",
+			args: []string{"-cfg", "/tmp/olb-config-test", "-proxy.addr", ":6666"},
+			path: "/tmp/olb-config-test",
 			data: "proxy.addr = :5555",
 			cfg: func(cfg *Config) *Config {
 				cfg.Listen = []Listen{{Addr: ":6666", Proto: "http"}}
@@ -741,25 +621,25 @@ func TestLoad(t *testing.T) {
 		},
 		{
 			desc: "cmdline over config file II",
-			args: []string{"-proxy.addr", ":6666", "-cfg", "/tmp/fabio-config-test"},
-			path: "/tmp/fabio-config-test",
+			args: []string{"-proxy.addr", ":6666", "-cfg", "/tmp/olb-config-test"},
+			path: "/tmp/olb-config-test",
 			data: "proxy.addr = :5555",
 			cfg: func(cfg *Config) *Config {
 				cfg.Listen = []Listen{{Addr: ":6666", Proto: "http"}}
 				return cfg
 			},
 		},
-		{
-			desc:    "environ over config file",
-			args:    []string{"-cfg", "/tmp/fabio-config-test"},
-			environ: []string{"FABIO_proxy_addr=:6666"},
-			path:    "/tmp/fabio-config-test",
-			data:    "proxy.addr = :5555",
-			cfg: func(cfg *Config) *Config {
-				cfg.Listen = []Listen{{Addr: ":6666", Proto: "http"}}
-				return cfg
-			},
-		},
+		//{
+		//	desc:    "environ over config file",
+		//	args:    []string{"-cfg", "/tmp/olb-config-test"},
+		//	environ: []string{"FABIO_proxy_addr=:6666"},
+		//	path:    "/tmp/olb-config-test",
+		//	data:    "proxy.addr = :5555",
+		//	cfg: func(cfg *Config) *Config {
+		//		cfg.Listen = []Listen{{Addr: ":6666", Proto: "http"}}
+		//		return cfg
+		//	},
+		//},
 		{
 			desc:    "cmdline over environ",
 			args:    []string{"-proxy.addr", ":5555"},
@@ -847,7 +727,7 @@ func TestLoad(t *testing.T) {
 			}
 
 			// config parser expects the exe name to be the first argument
-			cfg, err := Load(append([]string{"fabio"}, tt.args...), tt.environ)
+			cfg, err := Load(append([]string{"olb"}, tt.args...), tt.environ)
 			if got, want := err, tt.err; !reflect.DeepEqual(got, want) {
 				t.Fatalf("got error %v want %v", got, want)
 			}

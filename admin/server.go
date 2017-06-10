@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/fabiolb/fabio/admin/api"
-	"github.com/fabiolb/fabio/admin/ui"
-	"github.com/fabiolb/fabio/config"
-	"github.com/fabiolb/fabio/proxy"
+	"github.com/millisecond/olb/admin/api"
+	"github.com/millisecond/olb/admin/ui"
+	"github.com/millisecond/olb/config"
+	"github.com/millisecond/olb/proxy"
 )
 
 // Server provides the HTTP server for the admin UI and API.

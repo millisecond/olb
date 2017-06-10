@@ -15,8 +15,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/fabiolb/fabio/config"
-	"github.com/fabiolb/fabio/exit"
+	"github.com/millisecond/olb/config"
+	"github.com/millisecond/olb/exit"
 )
 
 // DefaultRegistry stores the metrics library provider.

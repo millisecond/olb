@@ -71,7 +71,7 @@ func main() {
 	cmc.CheckManager.Check.InstanceID = ""
 	// Search tag - a specific tag which, when coupled with the instanceId serves to identify the
 	// origin and/or grouping of the metrics
-	// default: service:application name (e.g. service:consul)
+	// default: service:application name (e.g. service:olb)
 	cmc.CheckManager.Check.SearchTag = ""
 	// Check secret, default: generated when a check needs to be created
 	cmc.CheckManager.Check.Secret = ""

@@ -13,8 +13,7 @@
 .idea
 .vagrant
 build/builds/
-fabio
-fabio.sublime-*
+olb
 demo/cert/
 pkg/
 

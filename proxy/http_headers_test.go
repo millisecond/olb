@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/fabiolb/fabio/config"
+	"github.com/millisecond/olb/config"
 	"github.com/pascaldekloe/goe/verify"
 )
 
