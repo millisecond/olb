@@ -326,6 +326,36 @@ func (t Table) Lookup(req *http.Request, trace string, pick picker, match matche
 	return target
 }
 
+// Lookup finds a target url based on the current matcher and picker
+// or nil if there is none. It first checks the routes for the host
+// and if none matches then it falls back to generic routes without
+// a host. This is useful for a catch-all '/' rule.
+func (t Table) LookupHTTP(req *http.Request, trace string, pick httpPicker, match matcher) (target *Target) {
+	path := req.URL.Path
+	if trace != "" {
+		if len(trace) > 16 {
+			trace = trace[:15]
+		}
+		log.Printf("[TRACE] %s Tracing %s%s", trace, req.Host, path)
+	}
+
+	// find matching hosts for the request
+	// and add "no host" as the fallback option
+	hosts := t.matchingHosts(req)
+	hosts = append(hosts, "")
+	for _, h := range hosts {
+		if target = t.lookupHTTP(h, path, trace, pick, match, req); target != nil {
+			break
+		}
+	}
+
+	if target != nil && trace != "" {
+		log.Printf("[TRACE] %s Routing to service %s on %s", trace, target.Service, target.URL)
+	}
+
+	return target
+}
+
 func (t Table) LookupHost(host string, pick picker) *Target {
 	return t.lookup(host, "/", "", pick, prefixMatcher)
 }
@@ -351,6 +381,32 @@ func (t Table) lookup(host, path, trace string, pick picker, match matcher) *Tar
 		}
 		if trace != "" {
 			log.Printf("[TRACE] %s No match %s%s", trace, r.Host, r.Path)
+		}
+	}
+	return nil
+}
+
+func (t Table) lookupHTTP(host, path, trace string, pick httpPicker, match matcher, req *http.Request) *Target {
+	for _, r := range t[host] {
+		if match(path, r) {
+			n := len(r.Targets)
+			if n == 0 {
+				return nil
+			}
+
+			var target *Target
+			if n == 1 {
+				target = r.Targets[0]
+			} else {
+				target = pick(r, req)
+			}
+			if trace != "" {
+				log.Printf("[TRACE] %s HTTP Match %s%s", trace, r.Host, r.Path)
+			}
+			return target
+		}
+		if trace != "" {
+			log.Printf("[TRACE] %s No HTTP match %s%s", trace, r.Host, r.Path)
 		}
 	}
 	return nil

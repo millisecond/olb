@@ -43,7 +43,7 @@ func TestTCPProxy(t *testing.T) {
 		h := &tcp.Proxy{
 			Lookup: func(h string) string {
 				tbl, _ := route.NewTable("route add srv :57778 tcp://" + srv.Addr)
-				t := tbl.LookupHost(h, route.Picker["rr"])
+				t := tbl.LookupHost(h, route.Pickers["rr"])
 				return t.URL.Host
 			},
 		}

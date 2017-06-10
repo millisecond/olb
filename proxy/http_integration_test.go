@@ -75,6 +75,43 @@ func TestProxyRequestIDHeader(t *testing.T) {
 	}
 }
 
+func TestCookiePersistence(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(500)
+	}))
+	defer server.Close()
+
+	proxy := httptest.NewServer(&HTTPProxy{
+		Config:    config.Proxy{Strategy: "cookie"},
+		Transport: http.DefaultTransport,
+		Lookup: func(r *http.Request) *route.Target {
+			tbl, _ := route.NewTable("route add mock / " + server.URL)
+			t := tbl.LookupHTTP(r, r.Header.Get("trace"), route.HTTPPickers["cookie"], route.Matcher["prefix"])
+			return t
+		},
+	})
+	defer proxy.Close()
+
+	req, _ := http.NewRequest("GET", proxy.URL, nil)
+	resp, _ := mustDo(req)
+
+	if got, want := resp.StatusCode, 500; got != want {
+		t.Fatalf("got %d want %d", got, want)
+	}
+
+	got := ""
+
+	for _, cookie := range resp.Cookies() {
+		if cookie.Name == route.HTTP_COOKIENAME {
+			got = cookie.Value
+		}
+	}
+
+	if want := "123"; got != want {
+		t.Errorf("got %v, but want %v", got, want)
+	}
+}
+
 func TestProxyNoRouteStaus(t *testing.T) {
 	proxy := httptest.NewServer(&HTTPProxy{
 		Config:    config.Proxy{NoRouteStatus: 999},
@@ -103,7 +140,7 @@ func TestProxyStripsPath(t *testing.T) {
 		Transport: http.DefaultTransport,
 		Lookup: func(r *http.Request) *route.Target {
 			tbl, _ := route.NewTable("route add mock /foo/bar " + server.URL + ` opts "strip=/foo"`)
-			return tbl.Lookup(r, "", route.Picker["rr"], route.Matcher["prefix"])
+			return tbl.Lookup(r, "", route.Pickers["rr"], route.Matcher["prefix"])
 		},
 	})
 	defer proxy.Close()
@@ -135,7 +172,7 @@ func TestProxyHost(t *testing.T) {
 			routes += "route add mock /hostunknown http://a.com/ opts \"host=garbble\"\n"
 			routes += "route add mock / http://a.com/"
 			tbl, _ := route.NewTable(routes)
-			return tbl.Lookup(r, "", route.Picker["rr"], route.Matcher["prefix"])
+			return tbl.Lookup(r, "", route.Pickers["rr"], route.Matcher["prefix"])
 		},
 	})
 	defer proxy.Close()
@@ -271,7 +308,7 @@ func TestProxyHTTPSUpstream(t *testing.T) {
 		Transport: &http.Transport{TLSClientConfig: tlsClientConfig()},
 		Lookup: func(r *http.Request) *route.Target {
 			tbl, _ := route.NewTable("route add srv / " + server.URL + ` opts "proto=https"`)
-			return tbl.Lookup(r, "", route.Picker["rr"], route.Matcher["prefix"])
+			return tbl.Lookup(r, "", route.Pickers["rr"], route.Matcher["prefix"])
 		},
 	})
 	defer proxy.Close()
@@ -299,7 +336,7 @@ func TestProxyHTTPSUpstreamSkipVerify(t *testing.T) {
 		},
 		Lookup: func(r *http.Request) *route.Target {
 			tbl, _ := route.NewTable("route add srv / " + server.URL + ` opts "proto=https tlsskipverify=true"`)
-			return tbl.Lookup(r, "", route.Picker["rr"], route.Matcher["prefix"])
+			return tbl.Lookup(r, "", route.Pickers["rr"], route.Matcher["prefix"])
 		},
 	})
 	defer proxy.Close()
@@ -503,7 +540,7 @@ func BenchmarkProxyLogger(b *testing.B) {
 		Transport: http.DefaultTransport,
 		Lookup: func(r *http.Request) *route.Target {
 			tbl, _ := route.NewTable("route add mock / " + server.URL)
-			return tbl.Lookup(r, "", route.Picker["rr"], route.Matcher["prefix"])
+			return tbl.Lookup(r, "", route.Pickers["rr"], route.Matcher["prefix"])
 		},
 		Logger: l,
 	}

@@ -131,7 +131,7 @@ func newHTTPProxy(cfg *config.Config) http.Handler {
 		exit.Fatal("[FATAL] Invalid log format: ", err)
 	}
 
-	pick := route.Picker[cfg.Proxy.Strategy]
+	pick := route.HTTPPickers[cfg.Proxy.Strategy]
 	match := route.Matcher[cfg.Proxy.Matcher]
 	notFound := metrics.DefaultRegistry.GetCounter("notfound")
 	log.Printf("[INFO] Using routing strategy %q", cfg.Proxy.Strategy)
@@ -154,7 +154,7 @@ func newHTTPProxy(cfg *config.Config) http.Handler {
 		Transport:         newTransport(nil),
 		InsecureTransport: newTransport(&tls.Config{InsecureSkipVerify: true}),
 		Lookup: func(r *http.Request) *route.Target {
-			t := route.GetTable().Lookup(r, r.Header.Get("trace"), pick, match)
+			t := route.GetTable().LookupHTTP(r, r.Header.Get("trace"), pick, match)
 			if t == nil {
 				notFound.Inc(1)
 				log.Print("[WARN] No route for ", r.Host, r.URL)
@@ -168,7 +168,7 @@ func newHTTPProxy(cfg *config.Config) http.Handler {
 }
 
 func lookupHostFn(cfg *config.Config) func(string) string {
-	pick := route.Picker[cfg.Proxy.Strategy]
+	pick := route.Pickers[cfg.Proxy.Strategy]
 	notFound := metrics.DefaultRegistry.GetCounter("notfound")
 	return func(host string) string {
 		t := route.GetTable().LookupHost(host, pick)

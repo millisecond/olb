@@ -32,7 +32,7 @@ func TestGracefulShutdown(t *testing.T) {
 			Transport: http.DefaultTransport,
 			Lookup: func(r *http.Request) *route.Target {
 				tbl, _ := route.NewTable("route add svc / " + srv.URL)
-				return tbl.Lookup(r, "", route.Picker["rr"], route.Matcher["prefix"])
+				return tbl.Lookup(r, "", route.Pickers["rr"], route.Matcher["prefix"])
 			},
 		}
 		l := config.Listen{Addr: addr}

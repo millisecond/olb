@@ -8,9 +8,9 @@ import (
 // picker selects a target from a list of targets.
 type picker func(r *Route) *Target
 
-// Picker contains the available picker functions.
+// Pickers contains the available picker functions.
 // Update config/load.go#load after updating.
-var Picker = map[string]picker{
+var Pickers = map[string]picker{
 	"rnd": rndPicker,
 	"rr":  rrPicker,
 }
