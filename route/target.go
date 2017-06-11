@@ -3,10 +3,18 @@ package route
 import (
 	"net/url"
 
+	"github.com/guregu/dynamo"
+
 	"github.com/millisecond/olb/metrics"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/millisecond/olb/config"
 )
 
+const HASHKEY_TARGET = "Target"
+
 type Target struct {
+	ID string
+
 	// Service is the name of the service the targetURL points to
 	Service string
 
@@ -42,4 +50,14 @@ type Target struct {
 
 	// timerName is the name of the timer in the metrics registry
 	timerName string
+}
+
+func (t *Target) put(config *config.Config) error {
+	sess, err := session.NewSession(config.AWSConfig.AWSConfig())
+	if err != nil {
+		return err
+	}
+	db := dynamo.New(sess, config.AWSConfig.AWSConfig())
+	table := db.Table(config.AWSConfig.DynamoTableName)
+	return table.Put(dynamo.AWSEncoding(t)).Run()
 }
