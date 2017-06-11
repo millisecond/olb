@@ -1,5 +1,5 @@
 
-##### Current version: 1.5.0
+##### Current version: UNRELEASED / FIRST VERSION IN DEV
 
 [![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/millisecond/olb/master/LICENSE)
 
