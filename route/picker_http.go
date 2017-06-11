@@ -5,7 +5,6 @@ import (
 	"net/http"
 )
 
-const HTTP_COOKIE_CONTEXT_KEY="HTTP_COOKIE_CONTEXT_KEY"
 const HTTP_COOKIENAME="OLBKEY"
 
 // picker selects a target from a list of targets.

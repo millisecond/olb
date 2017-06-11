@@ -77,7 +77,7 @@ func TestProxyRequestIDHeader(t *testing.T) {
 
 func TestCookiePersistence(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(500)
+		w.WriteHeader(200)
 	}))
 	defer server.Close()
 
@@ -95,21 +95,41 @@ func TestCookiePersistence(t *testing.T) {
 	req, _ := http.NewRequest("GET", proxy.URL, nil)
 	resp, _ := mustDo(req)
 
-	if got, want := resp.StatusCode, 500; got != want {
+	if got, want := resp.StatusCode, 200; got != want {
 		t.Fatalf("got %d want %d", got, want)
 	}
 
-	got := ""
+	got := persistentCookieValue(resp)
 
+	if want := "123"; got != want {
+		t.Errorf("got %v, but want %v", got, want)
+	}
+
+	// Validate that if we send in the cookie, no cookie comes back
+
+	req, _ = http.NewRequest("GET", proxy.URL, nil)
+	req.AddCookie(&http.Cookie{Name: route.HTTP_COOKIENAME, Value: got})
+	resp, _ = mustDo(req)
+
+	if got, want := resp.StatusCode, 200; got != want {
+		t.Fatalf("got %d want %d", got, want)
+	}
+
+	got = persistentCookieValue(resp)
+
+	if want := ""; got != want {
+		t.Errorf("got %v, but want %v", got, want)
+	}
+}
+
+func persistentCookieValue(resp *http.Response) string {
+	got := ""
 	for _, cookie := range resp.Cookies() {
 		if cookie.Name == route.HTTP_COOKIENAME {
 			got = cookie.Value
 		}
 	}
-
-	if want := "123"; got != want {
-		t.Errorf("got %v, but want %v", got, want)
-	}
+	return got
 }
 
 func TestProxyNoRouteStaus(t *testing.T) {

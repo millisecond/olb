@@ -148,11 +148,17 @@ func (p *HTTPProxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		timeNow = time.Now
 	}
 
-	//if len(t.CookiePersistence) > 0 {
-	//	http.SetCookie(w, &http.Cookie{Name: route.HTTP_COOKIENAME, Value: t.CookiePersistence, Path: "/"})
-	//}
-
-	http.SetCookie(w, &http.Cookie{Name: route.HTTP_COOKIENAME, Value: "543", Path: "/"})
+	if p.Config.Strategy == "cookie" {
+		existing := ""
+		for _, cookie := range r.Cookies() {
+			if cookie.Name == route.HTTP_COOKIENAME {
+				existing = cookie.Value
+			}
+		}
+		if len(existing) == 0 {
+			http.SetCookie(w, &http.Cookie{Name: route.HTTP_COOKIENAME, Value: "123", Path: "/"})
+		}
+	}
 
 	start := timeNow()
 	h.ServeHTTP(w, r)
