@@ -1,11 +1,11 @@
 package config
 
 import (
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"net/http"
 	"regexp"
 	"time"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
 )
 
 type Config struct {
@@ -16,17 +16,17 @@ type Config struct {
 	Metrics     Metrics
 	UI          UI
 	Runtime     Runtime
-	AWSConfig		    AWSConfig
+	AWSConfig   AWSConfig
 	ProfileMode string
 	ProfilePath string
 }
 
 type AWSConfig struct {
-	Region string
-	Endpoint string
+	Region          string
+	Endpoint        string
 	DynamoTableName string
-	Key string
-	Secret string
+	Key             string
+	Secret          string
 }
 
 func (cfg *AWSConfig) Generate() *aws.Config {

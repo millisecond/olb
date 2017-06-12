@@ -2,15 +2,15 @@ package route
 
 import (
 	"github.com/millisecond/olb/config"
+	"github.com/millisecond/olb/install"
 	"github.com/millisecond/olb/uuid"
 	"testing"
-	"github.com/millisecond/olb/install"
 )
 
 func TestTargetPut(t *testing.T) {
 	target := &Target{
 		Type: HASHKEY_TARGET,
-		ID: uuid.NewUUID(),
+		ID:   uuid.NewUUID(),
 	}
 	cfg := &config.Config{
 		AWSConfig: config.AWSConfig{

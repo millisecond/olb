@@ -14,6 +14,3 @@ func Dynamo(config *config.Config) (*dynamo.DB, error) {
 	db := dynamo.New(sess, config.AWSConfig.Generate())
 	return db, nil
 }
-
-
-

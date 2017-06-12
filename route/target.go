@@ -5,9 +5,9 @@ import (
 
 	"github.com/guregu/dynamo"
 
-	"github.com/millisecond/olb/metrics"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/millisecond/olb/config"
+	"github.com/millisecond/olb/metrics"
 )
 
 const HASHKEY_TARGET = "Target"

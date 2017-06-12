@@ -7,7 +7,7 @@ import (
 
 type DynamoTableDefinition struct {
 	Type string `dynamo:"Type,hash"`
-	ID string `dynamo:"ID,range"`
+	ID   string `dynamo:"ID,range"`
 }
 
 func Install(cfg *config.Config) error {
@@ -22,4 +22,3 @@ func Install(cfg *config.Config) error {
 
 	return db.CreateTable(cfg.AWSConfig.DynamoTableName, &DynamoTableDefinition{}).Run()
 }
-

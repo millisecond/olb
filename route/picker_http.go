@@ -1,11 +1,10 @@
 package route
 
-
 import (
 	"net/http"
 )
 
-const HTTP_COOKIENAME="OLBKEY"
+const HTTP_COOKIENAME = "OLBKEY"
 
 // picker selects a target from a list of targets.
 type httpPicker func(r *Route, req *http.Request) *Target
@@ -14,8 +13,8 @@ type httpPicker func(r *Route, req *http.Request) *Target
 // Update config/load.go#load after updating.
 var HTTPPickers = map[string]httpPicker{
 	"cookie": cookieHTTPPicker,
-	"rnd": rndHTTPPicker,
-	"rr":  rrHTTPPicker,
+	"rnd":    rndHTTPPicker,
+	"rr":     rrHTTPPicker,
 }
 
 // rndPicker picks a random target from the list of targets.

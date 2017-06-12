@@ -24,8 +24,8 @@ import (
 
 	"golang.org/x/net/http2"
 
-	"github.com/millisecond/olb/config"
 	vaultapi "github.com/hashicorp/vault/api"
+	"github.com/millisecond/olb/config"
 	"github.com/pascaldekloe/goe/verify"
 )
 
