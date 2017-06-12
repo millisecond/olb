@@ -13,6 +13,8 @@ import (
 const HASHKEY_TARGET = "Target"
 
 type Target struct {
+	Type string
+
 	ID string
 
 	// Service is the name of the service the targetURL points to
@@ -53,11 +55,13 @@ type Target struct {
 }
 
 func (t *Target) put(config *config.Config) error {
-	sess, err := session.NewSession(config.AWSConfig.AWSConfig())
+	sess, err := session.NewSession(config.AWSConfig.Generate())
 	if err != nil {
 		return err
 	}
-	db := dynamo.New(sess, config.AWSConfig.AWSConfig())
+	db := dynamo.New(sess, config.AWSConfig.Generate())
 	table := db.Table(config.AWSConfig.DynamoTableName)
-	return table.Put(dynamo.AWSEncoding(t)).Run()
+	//encoded := dynamo.AWSEncoding(t)
+	put := table.Put(t)
+	return put.Run()
 }

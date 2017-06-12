@@ -16,7 +16,7 @@ type Config struct {
 	Metrics     Metrics
 	UI          UI
 	Runtime     Runtime
-	AWSConfig	AWSConfig
+	AWSConfig		    AWSConfig
 	ProfileMode string
 	ProfilePath string
 }
@@ -29,7 +29,7 @@ type AWSConfig struct {
 	Secret string
 }
 
-func (cfg *AWSConfig) AWSConfig() *aws.Config {
+func (cfg *AWSConfig) Generate() *aws.Config {
 	c := &aws.Config{}
 	if len(cfg.Region) > 0 {
 		c.Region = aws.String(cfg.Region)
