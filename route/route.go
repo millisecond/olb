@@ -9,6 +9,8 @@ import (
 	"strings"
 
 	"github.com/millisecond/olb/metrics"
+	"github.com/millisecond/olb/uuid"
+	"github.com/millisecond/olb/model"
 )
 
 // Route maps a path prefix to one or more target URLs.
@@ -30,12 +32,12 @@ type Route struct {
 	Opts map[string]string
 
 	// Targets contains the list of URLs
-	Targets []*Target
+	Targets []*model.Target
 
 	// wTargets contains 100 targets distributed
 	// according to their weight and ordered RR in the
 	// same order as targets
-	wTargets []*Target
+	wTargets []*model.Target
 
 	// total contains the total number of requests for this route.
 	// Used by the RRPicker
@@ -60,13 +62,14 @@ func (r *Route) addTarget(service string, targetURL *url.URL, fixedWeight float6
 		name = "unknown"
 	}
 
-	t := &Target{
+	t := &model.Target{
+		ID:          uuid.NewUUID(),
 		Service:     service,
 		Tags:        tags,
 		URL:         targetURL,
 		FixedWeight: fixedWeight,
 		Timer:       ServiceRegistry.GetTimer(name),
-		timerName:   name,
+		TimerName:   name,
 	}
 	if r.Opts != nil {
 		t.StripPath = r.Opts["strip"]
@@ -78,8 +81,8 @@ func (r *Route) addTarget(service string, targetURL *url.URL, fixedWeight float6
 	r.weighTargets()
 }
 
-func (r *Route) filter(skip func(t *Target) bool) {
-	var clone []*Target
+func (r *Route) filter(skip func(t *model.Target) bool) {
+	var clone []*model.Target
 	for _, t := range r.Targets {
 		if skip(t) {
 			continue
@@ -137,7 +140,7 @@ func contains(src, dst []string) bool {
 	return true
 }
 
-func (r *Route) TargetConfig(t *Target, addWeight bool) string {
+func (r *Route) TargetConfig(t *model.Target, addWeight bool) string {
 	s := fmt.Sprintf("route add %s %s %s", t.Service, r.Host+r.Path, t.URL)
 	if addWeight {
 		s += fmt.Sprintf(" weight %2.4f", t.Weight)
@@ -274,7 +277,7 @@ func (r *Route) weighTargets() {
 	}
 
 	sort.Sort(slots)
-	targets := make([]*Target, usedSlots)
+	targets := make([]*model.Target, usedSlots)
 	for _, s := range slots {
 		if s.n <= 0 {
 			continue

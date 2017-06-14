@@ -18,6 +18,7 @@ import (
 	"github.com/millisecond/olb/proxy/tcp"
 	"github.com/millisecond/olb/proxy/tcp/tcptest"
 	"github.com/millisecond/olb/route"
+	"github.com/millisecond/olb/route/picker"
 )
 
 var echoHandler tcp.HandlerFunc = func(c net.Conn) error {
@@ -43,7 +44,7 @@ func TestTCPProxy(t *testing.T) {
 		h := &tcp.Proxy{
 			Lookup: func(h string) string {
 				tbl, _ := route.NewTable("route add srv :57778 tcp://" + srv.Addr)
-				t := tbl.LookupHost(h, route.Pickers["rr"])
+				t := tbl.LookupHost(h, picker.Pickers["rr"])
 				return t.URL.Host
 			},
 		}

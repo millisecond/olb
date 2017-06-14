@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"net/url"
+	"github.com/millisecond/olb/route/picker"
 )
 
 func TestTableParse(t *testing.T) {
@@ -516,8 +518,16 @@ func TestTableLookup(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		if got, want := tbl.Lookup(tt.req, "", rndPicker, prefixMatcher).URL.String(), tt.dst; got != want {
+		if got, want := tbl.Lookup(tt.req, "", picker.RndPicker, prefixMatcher).URL.String(), tt.dst; got != want {
 			t.Errorf("%d: got %v want %v", i, got, want)
 		}
 	}
+}
+
+func mustParse(rawurl string) *url.URL {
+	u, err := url.Parse(rawurl)
+	if err != nil {
+		panic(err)
+	}
+	return u
 }

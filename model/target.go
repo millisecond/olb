@@ -1,4 +1,4 @@
-package route
+package model
 
 import (
 	"net/url"
@@ -51,7 +51,7 @@ type Target struct {
 	Timer metrics.Timer
 
 	// timerName is the name of the timer in the metrics registry
-	timerName string
+	TimerName string
 }
 
 func (t *Target) put(config *config.Config) error {

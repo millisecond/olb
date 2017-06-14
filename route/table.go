@@ -13,6 +13,8 @@ import (
 
 	"github.com/millisecond/olb/metrics"
 	"github.com/ryanuber/go-glob"
+	"github.com/millisecond/olb/model"
+	"github.com/millisecond/olb/route/picker"
 )
 
 var errInvalidPrefix = errors.New("route: prefix must not be empty")
@@ -72,7 +74,7 @@ func syncRegistry(t Table) {
 	for _, routes := range t {
 		for _, r := range routes {
 			for _, tg := range r.Targets {
-				timers[tg.timerName] = true
+				timers[tg.TimerName] = true
 			}
 		}
 	}
@@ -200,7 +202,7 @@ func (t Table) delRoute(d *RouteDef) error {
 	case len(d.Tags) > 0:
 		for _, routes := range t {
 			for _, r := range routes {
-				r.filter(func(tg *Target) bool {
+				r.filter(func(tg *model.Target) bool {
 					return (d.Service == "" || tg.Service == d.Service) && contains(tg.Tags, d.Tags)
 				})
 			}
@@ -209,7 +211,7 @@ func (t Table) delRoute(d *RouteDef) error {
 	case d.Src == "" && d.Dst == "":
 		for _, routes := range t {
 			for _, r := range routes {
-				r.filter(func(tg *Target) bool {
+				r.filter(func(tg *model.Target) bool {
 					return tg.Service == d.Service
 				})
 			}
@@ -220,7 +222,7 @@ func (t Table) delRoute(d *RouteDef) error {
 		if r == nil {
 			return nil
 		}
-		r.filter(func(tg *Target) bool {
+		r.filter(func(tg *model.Target) bool {
 			return tg.Service == d.Service
 		})
 
@@ -234,7 +236,7 @@ func (t Table) delRoute(d *RouteDef) error {
 		if r == nil {
 			return nil
 		}
-		r.filter(func(tg *Target) bool {
+		r.filter(func(tg *model.Target) bool {
 			return tg.Service == d.Service && tg.URL.String() == targetURL.String()
 		})
 	}
@@ -300,7 +302,7 @@ func (t Table) matchingHosts(req *http.Request) (hosts []string) {
 // or nil if there is none. It first checks the routes for the host
 // and if none matches then it falls back to generic routes without
 // a host. This is useful for a catch-all '/' rule.
-func (t Table) Lookup(req *http.Request, trace string, pick picker, match matcher) (target *Target) {
+func (t Table) Lookup(req *http.Request, trace string, pick picker.Picker, match matcher) (target *model.Target) {
 	path := req.URL.Path
 	if trace != "" {
 		if len(trace) > 16 {
@@ -330,7 +332,7 @@ func (t Table) Lookup(req *http.Request, trace string, pick picker, match matche
 // or nil if there is none. It first checks the routes for the host
 // and if none matches then it falls back to generic routes without
 // a host. This is useful for a catch-all '/' rule.
-func (t Table) LookupHTTP(req *http.Request, trace string, pick httpPicker, match matcher) (target *Target) {
+func (t Table) LookupHTTP(w http.ResponseWriter, req *http.Request, trace string, pick picker.HTTPPicker, match matcher) (target *model.Target) {
 	path := req.URL.Path
 	if trace != "" {
 		if len(trace) > 16 {
@@ -344,7 +346,7 @@ func (t Table) LookupHTTP(req *http.Request, trace string, pick httpPicker, matc
 	hosts := t.matchingHosts(req)
 	hosts = append(hosts, "")
 	for _, h := range hosts {
-		if target = t.lookupHTTP(h, path, trace, pick, match, req); target != nil {
+		if target = t.lookupHTTP(h, path, trace, pick, match, w, req); target != nil {
 			break
 		}
 	}
@@ -356,11 +358,11 @@ func (t Table) LookupHTTP(req *http.Request, trace string, pick httpPicker, matc
 	return target
 }
 
-func (t Table) LookupHost(host string, pick picker) *Target {
+func (t Table) LookupHost(host string, pick picker.Picker) *model.Target {
 	return t.lookup(host, "/", "", pick, prefixMatcher)
 }
 
-func (t Table) lookup(host, path, trace string, pick picker, match matcher) *Target {
+func (t Table) lookup(host, path, trace string, pick picker.Picker, match matcher) *model.Target {
 	for _, r := range t[host] {
 		if match(path, r) {
 			n := len(r.Targets)
@@ -368,11 +370,11 @@ func (t Table) lookup(host, path, trace string, pick picker, match matcher) *Tar
 				return nil
 			}
 
-			var target *Target
+			var target *model.Target
 			if n == 1 {
 				target = r.Targets[0]
 			} else {
-				target = pick(r)
+				target = pick(r.Targets)
 			}
 			if trace != "" {
 				log.Printf("[TRACE] %s Match %s%s", trace, r.Host, r.Path)
@@ -386,7 +388,7 @@ func (t Table) lookup(host, path, trace string, pick picker, match matcher) *Tar
 	return nil
 }
 
-func (t Table) lookupHTTP(host, path, trace string, pick httpPicker, match matcher, req *http.Request) *Target {
+func (t Table) lookupHTTP(host, path, trace string, pick picker.HTTPPicker, match matcher, w http.ResponseWriter, req *http.Request) *model.Target {
 	for _, r := range t[host] {
 		if match(path, r) {
 			n := len(r.Targets)
@@ -394,11 +396,11 @@ func (t Table) lookupHTTP(host, path, trace string, pick httpPicker, match match
 				return nil
 			}
 
-			var target *Target
+			var target *model.Target
 			if n == 1 {
 				target = r.Targets[0]
 			} else {
-				target = pick(r, req)
+				target = pick(r.Targets, w, req)
 			}
 			if trace != "" {
 				log.Printf("[TRACE] %s HTTP Match %s%s", trace, r.Host, r.Path)

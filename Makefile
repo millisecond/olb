@@ -23,7 +23,7 @@ build: checkdeps
 	$(GO) test -i ./...
 
 test: checkdeps
-	$(GO) test -v -test.timeout 15s `go list ./... | grep -v '/vendor/'`
+	@$(GO) test -test.timeout 15s `go list ./... | grep -v '/vendor/'`
 	@if [ $$? -eq 0 ] ; then \
 	    echo "All tests PASSED" ; \
     else \
@@ -32,7 +32,7 @@ test: checkdeps
 
 checkdeps:
 	[ -x "$(GOVENDOR)" ] || $(GO) get -u github.com/kardianos/govendor
-	govendor list +e | grep '^ e ' && { echo "Found missing packages. Please run 'govendor add +e'"; exit 1; } || : echo
+	@govendor list +e | grep '^ e ' && { echo "Found missing packages. Please run 'govendor add +e'"; exit 1; } || : echo
 
 gofmt:
 	gofmt -w `find . -type f -name '*.go' | grep -v vendor`

@@ -10,6 +10,8 @@ import (
 
 	"github.com/millisecond/olb/config"
 	"github.com/millisecond/olb/route"
+	"github.com/millisecond/olb/model"
+	"github.com/millisecond/olb/route/picker"
 )
 
 func TestGracefulShutdown(t *testing.T) {
@@ -30,9 +32,9 @@ func TestGracefulShutdown(t *testing.T) {
 		defer wg.Done()
 		h := &HTTPProxy{
 			Transport: http.DefaultTransport,
-			Lookup: func(r *http.Request) *route.Target {
+			Lookup: func(w http.ResponseWriter, r *http.Request) *model.Target {
 				tbl, _ := route.NewTable("route add svc / " + srv.URL)
-				return tbl.Lookup(r, "", route.Pickers["rr"], route.Matcher["prefix"])
+				return tbl.Lookup(r, "", picker.Pickers["rr"], route.Matcher["prefix"])
 			},
 		}
 		l := config.Listen{Addr: addr}

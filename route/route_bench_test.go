@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"sync"
 	"testing"
+	"github.com/millisecond/olb/route/picker"
 )
 
 var (
@@ -28,56 +29,56 @@ func initRoutes() {
 func BenchmarkPrefixMatcherRndPicker5Routes(b *testing.B) {
 	once.Do(initRoutes)
 	b.ResetTimer()
-	b.RunParallel(func(b *testing.PB) { benchmarkGet(b5Routes, prefixMatcher, rndPicker, b) })
+	b.RunParallel(func(b *testing.PB) { benchmarkGet(b5Routes, prefixMatcher, picker.RndPicker, b) })
 }
 
-func BenchmarkPrefixMatcherRRPicker5Routes(b *testing.B) {
-	once.Do(initRoutes)
-	b.ResetTimer()
-	b.RunParallel(func(b *testing.PB) { benchmarkGet(b5Routes, prefixMatcher, rrPicker, b) })
-}
+//func BenchmarkPrefixMatcherRRPicker5Routes(b *testing.B) {
+//	once.Do(initRoutes)
+//	b.ResetTimer()
+//	b.RunParallel(func(b *testing.PB) { benchmarkGet(b5Routes, prefixMatcher, rrPicker, b) })
+//}
 
 func BenchmarkPrefixMatcherRndPicker10Routes(b *testing.B) {
 	once.Do(initRoutes)
 	b.ResetTimer()
 	b.SetParallelism(3)
-	b.RunParallel(func(b *testing.PB) { benchmarkGet(b10Routes, prefixMatcher, rndPicker, b) })
+	b.RunParallel(func(b *testing.PB) { benchmarkGet(b10Routes, prefixMatcher, picker.RndPicker, b) })
 }
 
-func BenchmarkPrefixMatcherRRPicker10Routes(b *testing.B) {
-	once.Do(initRoutes)
-	b.ResetTimer()
-	b.SetParallelism(3)
-	b.RunParallel(func(b *testing.PB) { benchmarkGet(b10Routes, prefixMatcher, rrPicker, b) })
-}
+//func BenchmarkPrefixMatcherRRPicker10Routes(b *testing.B) {
+//	once.Do(initRoutes)
+//	b.ResetTimer()
+//	b.SetParallelism(3)
+//	b.RunParallel(func(b *testing.PB) { benchmarkGet(b10Routes, prefixMatcher, rrPicker, b) })
+//}
 
 func BenchmarkPrefixMatcherRndPicker100Routes(b *testing.B) {
 	once.Do(initRoutes)
 	b.ResetTimer()
 	b.SetParallelism(3)
-	b.RunParallel(func(b *testing.PB) { benchmarkGet(b100Routes, prefixMatcher, rndPicker, b) })
+	b.RunParallel(func(b *testing.PB) { benchmarkGet(b100Routes, prefixMatcher, picker.RndPicker, b) })
 }
 
-func BenchmarkPrefixMatcherRRPicker100Routes(b *testing.B) {
-	once.Do(initRoutes)
-	b.ResetTimer()
-	b.SetParallelism(3)
-	b.RunParallel(func(b *testing.PB) { benchmarkGet(b100Routes, prefixMatcher, rrPicker, b) })
-}
+//func BenchmarkPrefixMatcherRRPicker100Routes(b *testing.B) {
+//	once.Do(initRoutes)
+//	b.ResetTimer()
+//	b.SetParallelism(3)
+//	b.RunParallel(func(b *testing.PB) { benchmarkGet(b100Routes, prefixMatcher, rrPicker, b) })
+//}
 
 func BenchmarkPrefixMatcherRndPicker500Routes(b *testing.B) {
 	once.Do(initRoutes)
 	b.ResetTimer()
 	b.SetParallelism(3)
-	b.RunParallel(func(b *testing.PB) { benchmarkGet(b500Routes, prefixMatcher, rndPicker, b) })
+	b.RunParallel(func(b *testing.PB) { benchmarkGet(b500Routes, prefixMatcher, picker.RndPicker, b) })
 }
 
-func BenchmarkPrefixMatcherRRPicker500Routes(b *testing.B) {
-	once.Do(initRoutes)
-	b.ResetTimer()
-	b.SetParallelism(3)
-	b.RunParallel(func(b *testing.PB) { benchmarkGet(b500Routes, prefixMatcher, rrPicker, b) })
-}
+//func BenchmarkPrefixMatcherRRPicker500Routes(b *testing.B) {
+//	once.Do(initRoutes)
+//	b.ResetTimer()
+//	b.SetParallelism(3)
+//	b.RunParallel(func(b *testing.PB) { benchmarkGet(b500Routes, prefixMatcher, rrPicker, b) })
+//}
 
 // makeRoutes builds a set of routes for a set of domains
 // and target urls. For each domain all paths up to depth
@@ -120,7 +121,7 @@ func makeRequests(t Table) []*http.Request {
 
 // benchmarkGet runs the benchmark on the Table.Lookup() function with the
 // given matcher and picker functions.
-func benchmarkGet(t Table, match matcher, pick picker, pb *testing.PB) {
+func benchmarkGet(t Table, match matcher, pick picker.Picker, pb *testing.PB) {
 	reqs := makeRequests(t)
 	k, n := len(reqs), 0
 	for pb.Next() {

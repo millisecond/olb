@@ -1,31 +1,31 @@
-package route
+package picker
 
 import (
-	"sync/atomic"
 	"time"
+	"github.com/millisecond/olb/model"
 )
 
-// picker selects a target from a list of targets.
-type picker func(r *Route) *Target
+// Picker selects a target from a list of targets.
+type Picker func(targets []*model.Target) *model.Target
 
-// Pickers contains the available picker functions.
+// Pickers contains the available Picker functions.
 // Update config/load.go#load after updating.
-var Pickers = map[string]picker{
-	"rnd": rndPicker,
-	"rr":  rrPicker,
+var Pickers = map[string]Picker{
+	"rnd": RndPicker,
+	//"rr":  rrPicker,
 }
 
 // rndPicker picks a random target from the list of targets.
-func rndPicker(r *Route) *Target {
-	return r.wTargets[randIntn(len(r.wTargets))]
+func RndPicker(targets []*model.Target) *model.Target {
+	return targets[randIntn(len(targets))]
 }
 
-// rrPicker picks the next target from a list of targets using round-robin.
-func rrPicker(r *Route) *Target {
-	u := r.wTargets[r.total%uint64(len(r.wTargets))]
-	atomic.AddUint64(&r.total, 1)
-	return u
-}
+//// rrPicker picks the next target from a list of targets using round-robin.
+//func rrPicker(targets []*model.Target) *model.Target {
+//	u := targets[r.total%uint64(len(targets))]
+//	atomic.AddUint64(&r.total, 1)
+//	return u
+//}
 
 // stubbed out for testing
 // we implement the randIntN function using the nanosecond time counter

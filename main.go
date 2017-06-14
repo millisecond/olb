@@ -26,6 +26,8 @@ import (
 	"github.com/millisecond/olb/route"
 	"github.com/pkg/profile"
 	dmp "github.com/sergi/go-diff/diffmatchpatch"
+	"github.com/millisecond/olb/model"
+	"github.com/millisecond/olb/route/picker"
 )
 
 // version contains the version number
@@ -131,7 +133,7 @@ func newHTTPProxy(cfg *config.Config) http.Handler {
 		exit.Fatal("[FATAL] Invalid log format: ", err)
 	}
 
-	pick := route.HTTPPickers[cfg.Proxy.Strategy]
+	pick := picker.HTTPPickers[cfg.Proxy.Strategy]
 	match := route.Matcher[cfg.Proxy.Matcher]
 	notFound := metrics.DefaultRegistry.GetCounter("notfound")
 	log.Printf("[INFO] Using routing strategy %q", cfg.Proxy.Strategy)
@@ -153,13 +155,13 @@ func newHTTPProxy(cfg *config.Config) http.Handler {
 		Config:            cfg.Proxy,
 		Transport:         newTransport(nil),
 		InsecureTransport: newTransport(&tls.Config{InsecureSkipVerify: true}),
-		Lookup: func(r *http.Request) *route.Target {
-			t := route.GetTable().LookupHTTP(r, r.Header.Get("trace"), pick, match)
-			if t == nil {
+		Lookup: func(w http.ResponseWriter, req *http.Request) *model.Target {
+			target := route.GetTable().LookupHTTP(w, req, req.Header.Get("trace"), pick, match)
+			if target == nil {
 				notFound.Inc(1)
-				log.Print("[WARN] No route for ", r.Host, r.URL)
+				log.Print("[WARN] No route for ", req.Host, req.URL)
 			}
-			return t
+			return target
 		},
 		Requests: metrics.DefaultRegistry.GetTimer("requests"),
 		Noroute:  metrics.DefaultRegistry.GetCounter("notfound"),
@@ -168,7 +170,7 @@ func newHTTPProxy(cfg *config.Config) http.Handler {
 }
 
 func lookupHostFn(cfg *config.Config) func(string) string {
-	pick := route.Pickers[cfg.Proxy.Strategy]
+	pick := picker.Pickers[cfg.Proxy.Strategy]
 	notFound := metrics.DefaultRegistry.GetCounter("notfound")
 	return func(host string) string {
 		t := route.GetTable().LookupHost(host, pick)

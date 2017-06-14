@@ -13,6 +13,8 @@ import (
 	"github.com/millisecond/olb/route"
 
 	"golang.org/x/net/websocket"
+	"github.com/millisecond/olb/model"
+	"github.com/millisecond/olb/route/picker"
 )
 
 func TestProxyWSUpstream(t *testing.T) {
@@ -34,9 +36,9 @@ func TestProxyWSUpstream(t *testing.T) {
 		Config:            config.Proxy{NoRouteStatus: 404, GZIPContentTypes: regexp.MustCompile(".*")},
 		Transport:         &http.Transport{TLSClientConfig: tlsClientConfig()},
 		InsecureTransport: &http.Transport{TLSClientConfig: tlsInsecureConfig()},
-		Lookup: func(r *http.Request) *route.Target {
+		Lookup: func(w http.ResponseWriter, r *http.Request) *model.Target {
 			tbl, _ := route.NewTable(routes)
-			return tbl.Lookup(r, "", route.Pickers["rr"], route.Matcher["prefix"])
+			return tbl.Lookup(r, "", picker.Pickers["rr"], route.Matcher["prefix"])
 		},
 	})
 	defer httpProxy.Close()
@@ -46,9 +48,9 @@ func TestProxyWSUpstream(t *testing.T) {
 		Config:            config.Proxy{NoRouteStatus: 404},
 		Transport:         &http.Transport{TLSClientConfig: tlsClientConfig()},
 		InsecureTransport: &http.Transport{TLSClientConfig: tlsInsecureConfig()},
-		Lookup: func(r *http.Request) *route.Target {
+		Lookup: func(w http.ResponseWriter, r *http.Request) *model.Target {
 			tbl, _ := route.NewTable(routes)
-			return tbl.Lookup(r, "", route.Pickers["rr"], route.Matcher["prefix"])
+			return tbl.Lookup(r, "", picker.Pickers["rr"], route.Matcher["prefix"])
 		},
 	})
 	httpsProxy.TLS = tlsServerConfig()

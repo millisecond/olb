@@ -3,6 +3,7 @@ package route
 import (
 	"net/http"
 	"testing"
+	"github.com/millisecond/olb/route/picker"
 )
 
 // TestIssue57 tests that after deleting a all targets for
@@ -32,7 +33,7 @@ func TestIssue57(t *testing.T) {
 		if err != nil {
 			t.Fatalf("%d: got %v want nil", i, err)
 		}
-		target := tbl.Lookup(req, "", rrPicker, prefixMatcher)
+		target := tbl.Lookup(req, "", picker.RndPicker, prefixMatcher)
 		if target == nil {
 			t.Fatalf("%d: got %v want %v", i, target, want)
 		}

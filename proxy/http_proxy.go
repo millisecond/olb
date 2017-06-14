@@ -14,8 +14,8 @@ import (
 	"github.com/millisecond/olb/logger"
 	"github.com/millisecond/olb/metrics"
 	"github.com/millisecond/olb/proxy/gzip"
-	"github.com/millisecond/olb/route"
 	"github.com/millisecond/olb/uuid"
+	"github.com/millisecond/olb/model"
 )
 
 // HTTPProxy is a dynamic reverse proxy for HTTP and HTTPS protocols.
@@ -38,7 +38,7 @@ type HTTPProxy struct {
 
 	// Lookup returns a target host for the given request.
 	// The proxy will panic if this value is nil.
-	Lookup func(*http.Request) *route.Target
+	Lookup func(http.ResponseWriter, *http.Request) *model.Target
 
 	// Requests is a timer metric which is updated for every request.
 	Requests metrics.Timer
@@ -55,52 +55,52 @@ type HTTPProxy struct {
 	UUID func() string
 }
 
-func (p *HTTPProxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (p *HTTPProxy) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if p.Lookup == nil {
 		panic("no lookup function")
 	}
 
-	t := p.Lookup(r)
-	if t == nil {
+	target := p.Lookup(w, req)
+	if target == nil {
 		w.WriteHeader(p.Config.NoRouteStatus)
 		return
 	}
 
-	// build the request url since r.URL will get modified
+	// build the request url since req.URL will get modified
 	// by the reverse proxy and contains only the RequestURI anyway
 	requestURL := &url.URL{
-		Scheme:   scheme(r),
-		Host:     r.Host,
-		Path:     r.URL.Path,
-		RawQuery: r.URL.RawQuery,
+		Scheme:   scheme(req),
+		Host:     req.Host,
+		Path:     req.URL.Path,
+		RawQuery: req.URL.RawQuery,
 	}
 
 	// build the real target url that is passed to the proxy
 	targetURL := &url.URL{
-		Scheme: t.URL.Scheme,
-		Host:   t.URL.Host,
-		Path:   r.URL.Path,
+		Scheme: target.URL.Scheme,
+		Host:   target.URL.Host,
+		Path:   req.URL.Path,
 	}
-	if t.URL.RawQuery == "" || r.URL.RawQuery == "" {
-		targetURL.RawQuery = t.URL.RawQuery + r.URL.RawQuery
+	if target.URL.RawQuery == "" || req.URL.RawQuery == "" {
+		targetURL.RawQuery = target.URL.RawQuery + req.URL.RawQuery
 	} else {
-		targetURL.RawQuery = t.URL.RawQuery + "&" + r.URL.RawQuery
+		targetURL.RawQuery = target.URL.RawQuery + "&" + req.URL.RawQuery
 	}
 
-	if t.Host == "dst" {
-		r.Host = targetURL.Host
+	if target.Host == "dst" {
+		req.Host = targetURL.Host
 	}
 
 	// TODO(fs): The HasPrefix check seems redundant since the lookup function should
 	// TODO(fs): have found the target based on the prefix but there may be other
 	// TODO(fs): matchers which may have different rules. I'll keep this for
 	// TODO(fs): a defensive approach.
-	if t.StripPath != "" && strings.HasPrefix(r.URL.Path, t.StripPath) {
-		targetURL.Path = targetURL.Path[len(t.StripPath):]
+	if target.StripPath != "" && strings.HasPrefix(req.URL.Path, target.StripPath) {
+		targetURL.Path = targetURL.Path[len(target.StripPath):]
 	}
 
-	if err := addHeaders(r, p.Config, t.StripPath); err != nil {
-		http.Error(w, "cannot parse "+r.RemoteAddr, http.StatusInternalServerError)
+	if err := addHeaders(req, p.Config, target.StripPath); err != nil {
+		http.Error(w, "cannot parse "+req.RemoteAddr, http.StatusInternalServerError)
 		return
 	}
 
@@ -109,13 +109,13 @@ func (p *HTTPProxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if id == nil {
 			id = uuid.NewUUID
 		}
-		r.Header.Set(p.Config.RequestID, id())
+		req.Header.Set(p.Config.RequestID, id())
 	}
 
-	upgrade, accept := r.Header.Get("Upgrade"), r.Header.Get("Accept")
+	upgrade, accept := req.Header.Get("Upgrade"), req.Header.Get("Accept")
 
 	tr := p.Transport
-	if t.TLSSkipVerify {
+	if target.TLSSkipVerify {
 		tr = p.InsecureTransport
 	}
 
@@ -148,28 +148,16 @@ func (p *HTTPProxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		timeNow = time.Now
 	}
 
-	if p.Config.Strategy == "cookie" {
-		existing := ""
-		for _, cookie := range r.Cookies() {
-			if cookie.Name == route.HTTP_COOKIENAME {
-				existing = cookie.Value
-			}
-		}
-		if len(existing) == 0 {
-			http.SetCookie(w, &http.Cookie{Name: route.HTTP_COOKIENAME, Value: "123", Path: "/"})
-		}
-	}
-
 	start := timeNow()
-	h.ServeHTTP(w, r)
+	h.ServeHTTP(w, req)
 	end := timeNow()
 	dur := end.Sub(start)
 
 	if p.Requests != nil {
 		p.Requests.Update(dur)
 	}
-	if t.Timer != nil {
-		t.Timer.Update(dur)
+	if target.Timer != nil {
+		target.Timer.Update(dur)
 	}
 
 	// get response and update metrics
@@ -191,11 +179,11 @@ func (p *HTTPProxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		p.Logger.Log(&logger.Event{
 			Start:           start,
 			End:             end,
-			Request:         r,
+			Request:         req,
 			Response:        rpt.resp,
 			RequestURL:      requestURL,
 			UpstreamAddr:    targetURL.Host,
-			UpstreamService: t.Service,
+			UpstreamService: target.Service,
 			UpstreamURL:     targetURL,
 		})
 	}
