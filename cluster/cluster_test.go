@@ -5,6 +5,8 @@ import (
 	"net"
 	"strconv"
 	"github.com/hashicorp/memberlist"
+	"github.com/facebookgo/ensure"
+	"time"
 )
 
 func TestBasicCluster(t *testing.T) {
@@ -14,18 +16,18 @@ func TestBasicCluster(t *testing.T) {
 	servers := []*memberlist.Memberlist{}
 	for _, node := range nodes {
 		host, port, err := net.SplitHostPort(node)
-		if err != nil {
-			t.Fatal("net.SplitHostPort: ", err)
-		}
+		ensure.Nil(t, err)
 		portI, _ :=  strconv.Atoi(port)
 		server := Start(node, host, portI, nodes)
 		servers = append(servers, server)
 	}
 	for _, server := range servers {
-		members := server.Members()
-		n := len(members)
-		if n != len(nodes) {
-			t.Fatal("Memberlist mismatch: ", n)
-		}
+		ensure.DeepEqual(t, len(server.Members()), len(nodes))
+	}
+	if !testing.Short() {
+		err := servers[0].Shutdown()
+		time.Sleep(time.Millisecond * 10000)
+		ensure.Nil(t, err)
+		ensure.DeepEqual(t, len(servers[1].Members()), len(nodes)-1)
 	}
 }
