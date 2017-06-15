@@ -3,10 +3,178 @@
 	"ignore": "test",
 	"package": [
 		{
+			"checksumSHA1": "M+ZeYktTT2wak9ZvQ0OZBbIHAGo=",
+			"path": "github.com/armon/go-metrics",
+			"revision": "f036747b9d0e8590f175a5d654a2194a7d9df4b5",
+			"revisionTime": "2017-06-01T21:44:32Z"
+		},
+		{
 			"checksumSHA1": "eAall4ACaMG40mzSJ5Oc95GiF1A=",
 			"path": "github.com/armon/go-proxyproto",
 			"revision": "609d6338d3a76ec26ac3fe7045a164d9a58436e7",
 			"revisionTime": "2015-02-06T18:58:55-08:00"
+		},
+		{
+			"checksumSHA1": "WaxHjCdExwH1N6fwANQqfF3YROU=",
+			"path": "github.com/aws/aws-sdk-go/aws",
+			"revision": "baba9e786eae5ba978f2007f8e718557b29157c8",
+			"revisionTime": "2017-04-12T18:25:50Z"
+		},
+		{
+			"checksumSHA1": "Y9W+4GimK4Fuxq+vyIskVYFRnX4=",
+			"path": "github.com/aws/aws-sdk-go/aws/awserr",
+			"revision": "baba9e786eae5ba978f2007f8e718557b29157c8",
+			"revisionTime": "2017-04-12T18:25:50Z"
+		},
+		{
+			"checksumSHA1": "yyYr41HZ1Aq0hWc3J5ijXwYEcac=",
+			"path": "github.com/aws/aws-sdk-go/aws/awsutil",
+			"revision": "baba9e786eae5ba978f2007f8e718557b29157c8",
+			"revisionTime": "2017-04-12T18:25:50Z"
+		},
+		{
+			"checksumSHA1": "iA8gPEZQ0g2lMwf8gfjOVqUiYc4=",
+			"path": "github.com/aws/aws-sdk-go/aws/client",
+			"revision": "baba9e786eae5ba978f2007f8e718557b29157c8",
+			"revisionTime": "2017-04-12T18:25:50Z"
+		},
+		{
+			"checksumSHA1": "ieAJ+Cvp/PKv1LpUEnUXpc3OI6E=",
+			"path": "github.com/aws/aws-sdk-go/aws/client/metadata",
+			"revision": "baba9e786eae5ba978f2007f8e718557b29157c8",
+			"revisionTime": "2017-04-12T18:25:50Z"
+		},
+		{
+			"checksumSHA1": "0Gfk83qXYimO87ZoK1lL9+ifWHo=",
+			"path": "github.com/aws/aws-sdk-go/aws/corehandlers",
+			"revision": "baba9e786eae5ba978f2007f8e718557b29157c8",
+			"revisionTime": "2017-04-12T18:25:50Z"
+		},
+		{
+			"checksumSHA1": "WKv1OkJtlhIHUjes6bB3QoWOA7o=",
+			"path": "github.com/aws/aws-sdk-go/aws/credentials",
+			"revision": "baba9e786eae5ba978f2007f8e718557b29157c8",
+			"revisionTime": "2017-04-12T18:25:50Z"
+		},
+		{
+			"checksumSHA1": "u3GOAJLmdvbuNUeUEcZSEAOeL/0=",
+			"path": "github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds",
+			"revision": "baba9e786eae5ba978f2007f8e718557b29157c8",
+			"revisionTime": "2017-04-12T18:25:50Z"
+		},
+		{
+			"checksumSHA1": "NUJUTWlc1sV8b7WjfiYc4JZbXl0=",
+			"path": "github.com/aws/aws-sdk-go/aws/credentials/endpointcreds",
+			"revision": "baba9e786eae5ba978f2007f8e718557b29157c8",
+			"revisionTime": "2017-04-12T18:25:50Z"
+		},
+		{
+			"checksumSHA1": "6cj/zsRmcxkE1TLS+v910GbQYg0=",
+			"path": "github.com/aws/aws-sdk-go/aws/credentials/stscreds",
+			"revision": "baba9e786eae5ba978f2007f8e718557b29157c8",
+			"revisionTime": "2017-04-12T18:25:50Z"
+		},
+		{
+			"checksumSHA1": "k4IMA27NIDHgZgvBxrKyJy16Y20=",
+			"path": "github.com/aws/aws-sdk-go/aws/defaults",
+			"revision": "baba9e786eae5ba978f2007f8e718557b29157c8",
+			"revisionTime": "2017-04-12T18:25:50Z"
+		},
+		{
+			"checksumSHA1": "/EXbk/z2TWjWc1Hvb4QYs3Wmhb8=",
+			"path": "github.com/aws/aws-sdk-go/aws/ec2metadata",
+			"revision": "baba9e786eae5ba978f2007f8e718557b29157c8",
+			"revisionTime": "2017-04-12T18:25:50Z"
+		},
+		{
+			"checksumSHA1": "+yCOae0vRONrO27QiITkGWblOKk=",
+			"path": "github.com/aws/aws-sdk-go/aws/endpoints",
+			"revision": "baba9e786eae5ba978f2007f8e718557b29157c8",
+			"revisionTime": "2017-04-12T18:25:50Z"
+		},
+		{
+			"checksumSHA1": "2wDGL7/JmUcCplvb7EQJPu4hzjw=",
+			"path": "github.com/aws/aws-sdk-go/aws/request",
+			"revision": "baba9e786eae5ba978f2007f8e718557b29157c8",
+			"revisionTime": "2017-04-12T18:25:50Z"
+		},
+		{
+			"checksumSHA1": "24VtK/Hym9lC8LkZlGLMdFGq+5o=",
+			"path": "github.com/aws/aws-sdk-go/aws/session",
+			"revision": "baba9e786eae5ba978f2007f8e718557b29157c8",
+			"revisionTime": "2017-04-12T18:25:50Z"
+		},
+		{
+			"checksumSHA1": "SvIsunO8D9MEKbetMENA4WRnyeE=",
+			"path": "github.com/aws/aws-sdk-go/aws/signer/v4",
+			"revision": "baba9e786eae5ba978f2007f8e718557b29157c8",
+			"revisionTime": "2017-04-12T18:25:50Z"
+		},
+		{
+			"checksumSHA1": "wk7EyvDaHwb5qqoOP/4d3cV0708=",
+			"path": "github.com/aws/aws-sdk-go/private/protocol",
+			"revision": "baba9e786eae5ba978f2007f8e718557b29157c8",
+			"revisionTime": "2017-04-12T18:25:50Z"
+		},
+		{
+			"checksumSHA1": "O6hcK24yI6w7FA+g4Pbr+eQ7pys=",
+			"path": "github.com/aws/aws-sdk-go/private/protocol/json/jsonutil",
+			"revision": "baba9e786eae5ba978f2007f8e718557b29157c8",
+			"revisionTime": "2017-04-12T18:25:50Z"
+		},
+		{
+			"checksumSHA1": "R00RL5jJXRYq1iiK1+PGvMfvXyM=",
+			"path": "github.com/aws/aws-sdk-go/private/protocol/jsonrpc",
+			"revision": "baba9e786eae5ba978f2007f8e718557b29157c8",
+			"revisionTime": "2017-04-12T18:25:50Z"
+		},
+		{
+			"checksumSHA1": "ZqY5RWavBLWTo6j9xqdyBEaNFRk=",
+			"path": "github.com/aws/aws-sdk-go/private/protocol/query",
+			"revision": "baba9e786eae5ba978f2007f8e718557b29157c8",
+			"revisionTime": "2017-04-12T18:25:50Z"
+		},
+		{
+			"checksumSHA1": "Drt1JfLMa0DQEZLWrnMlTWaIcC8=",
+			"path": "github.com/aws/aws-sdk-go/private/protocol/query/queryutil",
+			"revision": "baba9e786eae5ba978f2007f8e718557b29157c8",
+			"revisionTime": "2017-04-12T18:25:50Z"
+		},
+		{
+			"checksumSHA1": "VCTh+dEaqqhog5ncy/WTt9+/gFM=",
+			"path": "github.com/aws/aws-sdk-go/private/protocol/rest",
+			"revision": "baba9e786eae5ba978f2007f8e718557b29157c8",
+			"revisionTime": "2017-04-12T18:25:50Z"
+		},
+		{
+			"checksumSHA1": "lZ1z4xAbT8euCzKoAsnEYic60VE=",
+			"path": "github.com/aws/aws-sdk-go/private/protocol/xml/xmlutil",
+			"revision": "baba9e786eae5ba978f2007f8e718557b29157c8",
+			"revisionTime": "2017-04-12T18:25:50Z"
+		},
+		{
+			"checksumSHA1": "Y4Wg7dxPIU3W1dqN3vnpSLA1ChQ=",
+			"path": "github.com/aws/aws-sdk-go/service/dynamodb",
+			"revision": "baba9e786eae5ba978f2007f8e718557b29157c8",
+			"revisionTime": "2017-04-12T18:25:50Z"
+		},
+		{
+			"checksumSHA1": "uM9wwB9CYnMTeZrbOVEVjCVSXNQ=",
+			"path": "github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute",
+			"revision": "baba9e786eae5ba978f2007f8e718557b29157c8",
+			"revisionTime": "2017-04-12T18:25:50Z"
+		},
+		{
+			"checksumSHA1": "SdsHiTUR9eRarThv/i7y6/rVyF4=",
+			"path": "github.com/aws/aws-sdk-go/service/sts",
+			"revision": "baba9e786eae5ba978f2007f8e718557b29157c8",
+			"revisionTime": "2017-04-12T18:25:50Z"
+		},
+		{
+			"checksumSHA1": "NfQBkfSVHEmnR2OaORxdOXmhLcs=",
+			"path": "github.com/cenkalti/backoff",
+			"revision": "5d150e7eec023ce7a124856b37c68e54b4050ac7",
+			"revisionTime": "2017-03-29T03:22:34Z"
 		},
 		{
 			"checksumSHA1": "ZAdLZ0e/hin4AXxdS9F8y0yi/bg=",
@@ -45,6 +213,25 @@
 			"revisionTime": "2016-06-01T09:31:17Z"
 		},
 		{
+			"checksumSHA1": "VvZKmbuBN1QAG699KduTdmSPwA4=",
+			"origin": "github.com/aws/aws-sdk-go/vendor/github.com/go-ini/ini",
+			"path": "github.com/go-ini/ini",
+			"revision": "baba9e786eae5ba978f2007f8e718557b29157c8",
+			"revisionTime": "2017-04-12T18:25:50Z"
+		},
+		{
+			"checksumSHA1": "EQgQuiiNBERhVrKzFEkuyyOujOM=",
+			"path": "github.com/guregu/dynamo",
+			"revision": "f6629bc6b1a0d7b52e1e025bfc8f6eaf75e7bd2a",
+			"revisionTime": "2017-06-08T13:54:50Z"
+		},
+		{
+			"checksumSHA1": "KX8ywWYfjBPB5EGzVCNBT/+fhqw=",
+			"path": "github.com/guregu/dynamo/internal/exprs",
+			"revision": "f6629bc6b1a0d7b52e1e025bfc8f6eaf75e7bd2a",
+			"revisionTime": "2017-06-08T13:54:50Z"
+		},
+		{
 			"checksumSHA1": "cdOCt0Yb+hdErz8NAQqayxPmRsY=",
 			"path": "github.com/hashicorp/errwrap",
 			"revision": "7554cd9344cec97297fa6649b055a8c98c2a1e55",
@@ -55,6 +242,12 @@
 			"path": "github.com/hashicorp/go-cleanhttp",
 			"revision": "ad28ea4487f05916463e2423a55166280e8254b5",
 			"revisionTime": "2016-04-07T17:41:26Z"
+		},
+		{
+			"checksumSHA1": "TNlVzNR1OaajcNi3CbQ3bGbaLGU=",
+			"path": "github.com/hashicorp/go-msgpack/codec",
+			"revision": "fa3f63826f7c23912c15263591e65d54d080b458",
+			"revisionTime": "2015-05-18T23:42:57Z"
 		},
 		{
 			"checksumSHA1": "lrSl49G23l6NhfilxPM0XFs5rZo=",
@@ -73,6 +266,12 @@
 			"path": "github.com/hashicorp/go-rootcerts",
 			"revision": "6bb64b370b90e7ef1fa532be9e591a81c3493e00",
 			"revisionTime": "2016-05-03T09:34:40-05:00"
+		},
+		{
+			"checksumSHA1": "GP24Vz4EmZAL1ZH2TYTkDiiCO94=",
+			"path": "github.com/hashicorp/go-sockaddr",
+			"revision": "2d10d7c10258d11196c0ebf2943509e4afd06cd4",
+			"revisionTime": "2017-05-23T22:50:28Z"
 		},
 		{
 			"checksumSHA1": "5LrCq/ydlbL6pq1cdmuxiw7QV98=",
@@ -129,12 +328,10 @@
 			"revisionTime": "2016-06-07T00:19:40Z"
 		},
 		{
-			"checksumSHA1": "o8In5byYGDCY/mnTuV4Tfmci+3w=",
-			"path": "github.com/hashicorp/serf/coordinate",
-			"revision": "0df3e3df1703f838243a7f3f12bf0b88566ade5a",
-			"revisionTime": "2015-12-21T18:49:50Z",
-			"version": "v0.6.4",
-			"versionExact": "v0.6.4"
+			"checksumSHA1": "AoIvQFHycqypYK57ZjiWzlQmdwk=",
+			"path": "github.com/hashicorp/memberlist",
+			"revision": "16fe34d996eba2b68f6f46f26c51c617c6bc1bf0",
+			"revisionTime": "2017-05-26T19:17:51Z"
 		},
 		{
 			"checksumSHA1": "9/RHDTjqflfK3/f2Tfvwx+82I40=",
@@ -143,6 +340,13 @@
 			"revisionTime": "2016-06-14T07:51:08Z",
 			"version": "v0.6.0",
 			"versionExact": "v0.6.0"
+		},
+		{
+			"checksumSHA1": "0ZrwvB6KoGPj2PoDNSEJwxQ6Mog=",
+			"origin": "github.com/aws/aws-sdk-go/vendor/github.com/jmespath/go-jmespath",
+			"path": "github.com/jmespath/go-jmespath",
+			"revision": "baba9e786eae5ba978f2007f8e718557b29157c8",
+			"revisionTime": "2017-04-12T18:25:50Z"
 		},
 		{
 			"checksumSHA1": "8tUFfUWBv4AxQRDoF2LVo2OoLVc=",
@@ -155,6 +359,12 @@
 			"path": "github.com/magiconair/properties",
 			"revision": "c265cfa48dda6474e208715ca93e987829f572f8",
 			"revisionTime": "2016-03-20T21:54:47+01:00"
+		},
+		{
+			"checksumSHA1": "LYb1KNw16kU6m+XOO0o4o58YPnE=",
+			"path": "github.com/miekg/dns",
+			"revision": "e78414ef75607394ad7d917824f07f381df2eafa",
+			"revisionTime": "2017-06-04T12:30:08Z"
 		},
 		{
 			"checksumSHA1": "AXacfEchaUqT5RGmPmMXsOWRhv8=",
@@ -199,10 +409,22 @@
 			"revisionTime": "2016-02-26T08:37:05Z"
 		},
 		{
+			"checksumSHA1": "tnMZLo/kR9Kqx6GtmWwowtTLlA8=",
+			"path": "github.com/sean-/seed",
+			"revision": "e2103e2c35297fb7e17febb81e49b312087a2372",
+			"revisionTime": "2017-03-13T16:33:22Z"
+		},
+		{
 			"checksumSHA1": "iWCtyR1TkJ22Bi/ygzfKDvOQdQY=",
 			"path": "github.com/sergi/go-diff/diffmatchpatch",
 			"revision": "24e2351369ec4949b2ed0dc5c477afdd4c4034e8",
 			"revisionTime": "2017-01-18T13:12:30Z"
+		},
+		{
+			"checksumSHA1": "Y+HGqEkYM15ir+J93MEaHdyFy0c=",
+			"path": "golang.org/x/net/context",
+			"revision": "da118f7b8e5954f39d0d2130ab35d4bf0e3cb344",
+			"revisionTime": "2017-04-23T14:02:46Z"
 		},
 		{
 			"checksumSHA1": "N1akwAdrHVfPPrsFOhG2ouP21VA=",
