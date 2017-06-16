@@ -1,4 +1,4 @@
-package route
+package model
 
 import (
 	"fmt"
@@ -10,7 +10,6 @@ import (
 
 	"github.com/millisecond/olb/metrics"
 	"github.com/millisecond/olb/uuid"
-	"github.com/millisecond/olb/model"
 )
 
 // Route maps a path prefix to one or more target URLs.
@@ -32,19 +31,19 @@ type Route struct {
 	Opts map[string]string
 
 	// Targets contains the list of URLs
-	Targets []*model.Target
+	Targets []*Target
 
 	// wTargets contains 100 targets distributed
 	// according to their weight and ordered RR in the
 	// same order as targets
-	wTargets []*model.Target
+	wTargets []*Target
 
 	// total contains the total number of requests for this route.
 	// Used by the RRPicker
-	total uint64
+	Total uint64
 }
 
-func (r *Route) addTarget(service string, targetURL *url.URL, fixedWeight float64, tags []string) {
+func (r *Route) AddTarget(service string, targetURL *url.URL, fixedWeight float64, tags []string) {
 	if fixedWeight < 0 {
 		fixedWeight = 0
 	}
@@ -62,13 +61,13 @@ func (r *Route) addTarget(service string, targetURL *url.URL, fixedWeight float6
 		name = "unknown"
 	}
 
-	t := &model.Target{
+	t := &Target{
 		ID:          uuid.NewUUID(),
 		Service:     service,
 		Tags:        tags,
 		URL:         targetURL,
 		FixedWeight: fixedWeight,
-		Timer:       ServiceRegistry.GetTimer(name),
+		Timer:       metrics.ServiceRegistry.GetTimer(name),
 		TimerName:   name,
 	}
 	if r.Opts != nil {
@@ -78,11 +77,15 @@ func (r *Route) addTarget(service string, targetURL *url.URL, fixedWeight float6
 	}
 
 	r.Targets = append(r.Targets, t)
-	r.weighTargets()
+	r.WeighTargets()
 }
 
-func (r *Route) filter(skip func(t *model.Target) bool) {
-	var clone []*model.Target
+func (r *Route) WTargets() []*Target {
+	return r.wTargets
+}
+
+func (r *Route) Filter(skip func(t *Target) bool) {
+	var clone []*Target
 	for _, t := range r.Targets {
 		if skip(t) {
 			continue
@@ -90,17 +93,17 @@ func (r *Route) filter(skip func(t *model.Target) bool) {
 		clone = append(clone, t)
 	}
 	r.Targets = clone
-	r.weighTargets()
+	r.WeighTargets()
 }
 
-func (r *Route) setWeight(service string, weight float64, tags []string) int {
+func (r *Route) SetWeight(service string, weight float64, tags []string) int {
 	loop := func(w float64) int {
 		n := 0
 		for _, t := range r.Targets {
 			if service != "" && t.Service != service {
 				continue
 			}
-			if len(tags) > 0 && !contains(t.Tags, tags) {
+			if len(tags) > 0 && !Contains(t.Tags, tags) {
 				continue
 			}
 			n++
@@ -119,12 +122,12 @@ func (r *Route) setWeight(service string, weight float64, tags []string) int {
 	loop(w)
 
 	if n > 0 {
-		r.weighTargets()
+		r.WeighTargets()
 	}
 	return n
 }
 
-func contains(src, dst []string) bool {
+func Contains(src, dst []string) bool {
 	for _, d := range dst {
 		found := false
 		for _, s := range src {
@@ -140,7 +143,7 @@ func contains(src, dst []string) bool {
 	return true
 }
 
-func (r *Route) TargetConfig(t *model.Target, addWeight bool) string {
+func (r *Route) TargetConfig(t *Target, addWeight bool) string {
 	s := fmt.Sprintf("route add %s %s %s", t.Service, r.Host+r.Path, t.URL)
 	if addWeight {
 		s += fmt.Sprintf(" weight %2.4f", t.Weight)
@@ -168,7 +171,7 @@ func (r *Route) TargetConfig(t *model.Target, addWeight bool) string {
 
 // config returns the route configuration in the config language.
 // with the weights specified by the user.
-func (r *Route) config(addWeight bool) []string {
+func (r *Route) Config(addWeight bool) []string {
 	var cfg []string
 	for _, t := range r.Targets {
 		if t.Weight <= 0 {
@@ -183,7 +186,7 @@ func (r *Route) config(addWeight bool) []string {
 // weighted round-robin distribution for a single route. Consequently,
 // this then defines the maximum number of separate instances that can
 // serve a single route. maxSlots must be a power of ten.
-const maxSlots = 1e4 // 10000
+const MaxSlots = 1e4 // 10000
 
 // weighTargets computes the share of traffic each target receives based
 // on its weight and the weight of the other targets.
@@ -193,7 +196,7 @@ const maxSlots = 1e4 // 10000
 //
 // Targets with a dynamic weight will receive an equal share of the remaining
 // traffic if there is any left.
-func (r *Route) weighTargets() {
+func (r *Route) WeighTargets() {
 	// how big is the fixed weighted traffic?
 	var nFixed int
 	var sumFixed float64
@@ -267,7 +270,7 @@ func (r *Route) weighTargets() {
 	slots := make(byN, len(r.Targets))
 	usedSlots := 0
 	for i, t := range r.Targets {
-		n := int(float64(maxSlots) * t.Weight)
+		n := int(float64(MaxSlots) * t.Weight)
 		if n == 0 && t.Weight > 0 {
 			n = 1
 		}
@@ -277,7 +280,7 @@ func (r *Route) weighTargets() {
 	}
 
 	sort.Sort(slots)
-	targets := make([]*model.Target, usedSlots)
+	targets := make([]*Target, usedSlots)
 	for _, s := range slots {
 		if s.n <= 0 {
 			continue

@@ -22,7 +22,7 @@ build: checkdeps
 	$(GO) build -i $(GOFLAGS)
 	$(GO) test -i ./...
 
-test: checkdeps
+test:
 	@$(GO) test -test.timeout 15s `go list ./... | grep -v '/vendor/'`
 	@if [ $$? -eq 0 ] ; then \
 	    echo "All tests PASSED" ; \

@@ -11,6 +11,7 @@ import (
 	"testing"
 	"net/url"
 	"github.com/millisecond/olb/route/picker"
+	"github.com/millisecond/olb/model"
 )
 
 func TestTableParse(t *testing.T) {
@@ -387,14 +388,14 @@ func TestTableParse(t *testing.T) {
 				}
 
 				// check that there are at least some slots
-				if len(r.wTargets) == 0 {
+				if len(r.WTargets()) == 0 {
 					t.Fatalf("got 0 targets want some")
 				}
 
 				// pre-generate the target urls for comparison as this
 				// will otherwise slow the test down significantly
-				targetURLs := make([]string, len(r.wTargets))
-				for i, tg := range r.wTargets {
+				targetURLs := make([]string, len(r.WTargets()))
+				for i, tg := range r.WTargets() {
 					targetURLs[i] = tg.URL.Scheme + "://" + tg.URL.Host + tg.URL.Path
 				}
 
@@ -421,11 +422,11 @@ func TestTableParse(t *testing.T) {
 					}
 
 					// calc the weight as nSlots/totalSlots
-					gotWeight := float64(count) / float64(len(r.wTargets))
+					gotWeight := float64(count) / float64(len(r.WTargets()))
 
 					// round the weight down to the number of decimal points
 					// supported by maxSlots
-					gotWeight = float64(int(gotWeight*float64(maxSlots))) / float64(maxSlots)
+					gotWeight = float64(int(gotWeight*float64(model.MaxSlots))) / float64(model.MaxSlots)
 
 					// compare to the weight from the generated config
 					wantWeight := atof(p[6])

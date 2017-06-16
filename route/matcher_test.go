@@ -2,15 +2,16 @@ package route
 
 import (
 	"testing"
+	"github.com/millisecond/olb/model"
 )
 
 func TestPrefixMatcher(t *testing.T) {
-	routeFoo := &Route{Host: "www.example.com", Path: "/foo"}
+	routeFoo := &model.Route{Host: "www.example.com", Path: "/foo"}
 
 	tests := []struct {
 		uri   string
 		want  bool
-		route *Route
+		route *model.Route
 	}{
 		{"/fo", false, routeFoo},
 		{"/foo", true, routeFoo},
@@ -26,13 +27,13 @@ func TestPrefixMatcher(t *testing.T) {
 }
 
 func TestGlobMatcher(t *testing.T) {
-	routeFoo := &Route{Host: "www.example.com", Path: "/foo"}
-	routeFooWild := &Route{Host: "www.example.com", Path: "/foo.*"}
+	routeFoo := &model.Route{Host: "www.example.com", Path: "/foo"}
+	routeFooWild := &model.Route{Host: "www.example.com", Path: "/foo.*"}
 
 	tests := []struct {
 		uri   string
 		want  bool
-		route *Route
+		route *model.Route
 	}{
 		{"/fo", false, routeFoo},
 		{"/foo", true, routeFoo},

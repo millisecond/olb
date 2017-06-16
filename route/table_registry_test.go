@@ -6,23 +6,24 @@ import (
 	"testing"
 
 	"github.com/millisecond/olb/metrics"
+	"github.com/millisecond/olb/model"
 )
 
 func TestSyncRegistry(t *testing.T) {
-	oldRegistry := ServiceRegistry
-	ServiceRegistry = newStubRegistry()
-	defer func() { ServiceRegistry = oldRegistry }()
+	oldRegistry := metrics.ServiceRegistry
+	metrics.ServiceRegistry = newStubRegistry()
+	defer func() { metrics.ServiceRegistry = oldRegistry }()
 
 	tbl := make(Table)
-	tbl.addRoute(&RouteDef{Service: "svc-a", Src: "/aaa", Dst: "http://localhost:1234", Weight: 1})
-	tbl.addRoute(&RouteDef{Service: "svc-b", Src: "/bbb", Dst: "http://localhost:5678", Weight: 1})
-	if got, want := ServiceRegistry.Names(), []string{"svc-a._./aaa.localhost_1234", "svc-b._./bbb.localhost_5678"}; !reflect.DeepEqual(got, want) {
+	tbl.addRoute(&model.RouteDef{Service: "svc-a", Src: "/aaa", Dst: "http://localhost:1234", Weight: 1})
+	tbl.addRoute(&model.RouteDef{Service: "svc-b", Src: "/bbb", Dst: "http://localhost:5678", Weight: 1})
+	if got, want := metrics.ServiceRegistry.Names(), []string{"svc-a._./aaa.localhost_1234", "svc-b._./bbb.localhost_5678"}; !reflect.DeepEqual(got, want) {
 		t.Fatalf("got %v want %v", got, want)
 	}
 
-	tbl.delRoute(&RouteDef{Service: "svc-b", Src: "/bbb", Dst: "http://localhost:5678"})
+	tbl.delRoute(&model.RouteDef{Service: "svc-b", Src: "/bbb", Dst: "http://localhost:5678"})
 	syncRegistry(tbl)
-	if got, want := ServiceRegistry.Names(), []string{"svc-a._./aaa.localhost_1234"}; !reflect.DeepEqual(got, want) {
+	if got, want := metrics.ServiceRegistry.Names(), []string{"svc-a._./aaa.localhost_1234"}; !reflect.DeepEqual(got, want) {
 		t.Fatalf("got %v want %v", got, want)
 	}
 }

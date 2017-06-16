@@ -272,7 +272,7 @@ func initMetrics(cfg *config.Config) {
 	if metrics.DefaultRegistry, err = metrics.NewRegistry(cfg.Metrics); err != nil {
 		exit.Fatal("[FATAL] ", err)
 	}
-	if route.ServiceRegistry, err = metrics.NewRegistry(cfg.Metrics); err != nil {
+	if metrics.ServiceRegistry, err = metrics.NewRegistry(cfg.Metrics); err != nil {
 		exit.Fatal("[FATAL] ", err)
 	}
 }

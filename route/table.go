@@ -10,10 +10,9 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
-
-	"github.com/millisecond/olb/metrics"
 	"github.com/ryanuber/go-glob"
 	"github.com/millisecond/olb/model"
+	"github.com/millisecond/olb/metrics"
 	"github.com/millisecond/olb/route/picker"
 )
 
@@ -23,9 +22,6 @@ var errNoMatch = errors.New("route: no target match")
 
 // table stores the active routing table. Must never be nil.
 var table atomic.Value
-
-// ServiceRegistry stores the metrics for the services.
-var ServiceRegistry metrics.Registry = metrics.NoopRegistry{}
 
 // init initializes the routing table.
 func init() {
@@ -63,7 +59,7 @@ func syncRegistry(t Table) {
 	timers := map[string]bool{}
 
 	// get all registered timers
-	for _, name := range ServiceRegistry.Names() {
+	for _, name := range metrics.ServiceRegistry.Names() {
 		timers[name] = false
 	}
 
@@ -71,8 +67,8 @@ func syncRegistry(t Table) {
 	// this can also add new entries but we do not
 	// really care since we are only interested in the
 	// inactive ones.
-	for _, routes := range t {
-		for _, r := range routes {
+	for _, entries := range t {
+		for _, r := range entries {
 			for _, tg := range r.Targets {
 				timers[tg.TimerName] = true
 			}
@@ -82,7 +78,7 @@ func syncRegistry(t Table) {
 	// unregister inactive timers
 	for name, active := range timers {
 		if !active {
-			ServiceRegistry.Unregister(name)
+			metrics.ServiceRegistry.Unregister(name)
 			log.Printf("[INFO] Unregistered timer %s", name)
 		}
 	}
@@ -91,7 +87,7 @@ func syncRegistry(t Table) {
 // Table contains a set of routes grouped by host.
 // The host routes are sorted from most to least specific
 // by sorting the routes in reverse order by path.
-type Table map[string]Routes
+type Table map[string]model.Routes
 
 // hostpath splits a 'host/path' prefix into 'host' and '/path' or it returns a
 // ':port' prefix as ':port' and '' since there is no path component for TCP
@@ -118,11 +114,11 @@ func NewTable(s string) (t Table, err error) {
 	t = make(Table)
 	for _, d := range defs {
 		switch d.Cmd {
-		case RouteAddCmd:
+		case model.RouteAddCmd:
 			err = t.addRoute(d)
-		case RouteDelCmd:
+		case model.RouteDelCmd:
 			err = t.delRoute(d)
-		case RouteWeightCmd:
+		case model.RouteWeightCmd:
 			err = t.weighRoute(d)
 		default:
 			err = fmt.Errorf("route: invalid command: %s", d.Cmd)
@@ -135,7 +131,7 @@ func NewTable(s string) (t Table, err error) {
 }
 
 // addRoute adds a new route prefix -> target for the given service.
-func (t Table) addRoute(d *RouteDef) error {
+func (t Table) addRoute(d *model.RouteDef) error {
 	host, path := hostpath(d.Src)
 
 	if d.Src == "" {
@@ -154,37 +150,37 @@ func (t Table) addRoute(d *RouteDef) error {
 	switch {
 	// add new host
 	case t[host] == nil:
-		r := &Route{Host: host, Path: path, Opts: d.Opts}
-		r.addTarget(d.Service, targetURL, d.Weight, d.Tags)
-		t[host] = Routes{r}
+		r := &model.Route{Host: host, Path: path, Opts: d.Opts}
+		r.AddTarget(d.Service, targetURL, d.Weight, d.Tags)
+		t[host] = model.Routes{r}
 
 	// add new route to existing host
-	case t[host].find(path) == nil:
-		r := &Route{Host: host, Path: path, Opts: d.Opts}
-		r.addTarget(d.Service, targetURL, d.Weight, d.Tags)
+	case t[host].Find(path) == nil:
+		r := &model.Route{Host: host, Path: path, Opts: d.Opts}
+		r.AddTarget(d.Service, targetURL, d.Weight, d.Tags)
 		t[host] = append(t[host], r)
 		sort.Sort(t[host])
 
 	// add new target to existing route
 	default:
-		t[host].find(path).addTarget(d.Service, targetURL, d.Weight, d.Tags)
+		t[host].Find(path).AddTarget(d.Service, targetURL, d.Weight, d.Tags)
 	}
 
 	return nil
 }
 
-func (t Table) weighRoute(d *RouteDef) error {
+func (t Table) weighRoute(d *model.RouteDef) error {
 	host, path := hostpath(d.Src)
 
 	if d.Src == "" {
 		return errInvalidPrefix
 	}
 
-	if t[host] == nil || t[host].find(path) == nil {
+	if t[host] == nil || t[host].Find(path) == nil {
 		return errNoMatch
 	}
 
-	if n := t[host].find(path).setWeight(d.Service, d.Weight, d.Tags); n == 0 {
+	if n := t[host].Find(path).SetWeight(d.Service, d.Weight, d.Tags); n == 0 {
 		return errNoMatch
 	}
 	return nil
@@ -197,13 +193,13 @@ func (t Table) weighRoute(d *RouteDef) error {
 // instances of the service from the route. If only the service is
 // provided then all routes for this service are removed. The service
 // will no longer receive traffic. Routes with no targets are removed.
-func (t Table) delRoute(d *RouteDef) error {
+func (t Table) delRoute(d *model.RouteDef) error {
 	switch {
 	case len(d.Tags) > 0:
 		for _, routes := range t {
 			for _, r := range routes {
-				r.filter(func(tg *model.Target) bool {
-					return (d.Service == "" || tg.Service == d.Service) && contains(tg.Tags, d.Tags)
+				r.Filter(func(tg *model.Target) bool {
+					return (d.Service == "" || tg.Service == d.Service) && model.Contains(tg.Tags, d.Tags)
 				})
 			}
 		}
@@ -211,7 +207,7 @@ func (t Table) delRoute(d *RouteDef) error {
 	case d.Src == "" && d.Dst == "":
 		for _, routes := range t {
 			for _, r := range routes {
-				r.filter(func(tg *model.Target) bool {
+				r.Filter(func(tg *model.Target) bool {
 					return tg.Service == d.Service
 				})
 			}
@@ -222,7 +218,7 @@ func (t Table) delRoute(d *RouteDef) error {
 		if r == nil {
 			return nil
 		}
-		r.filter(func(tg *model.Target) bool {
+		r.Filter(func(tg *model.Target) bool {
 			return tg.Service == d.Service
 		})
 
@@ -236,14 +232,14 @@ func (t Table) delRoute(d *RouteDef) error {
 		if r == nil {
 			return nil
 		}
-		r.filter(func(tg *model.Target) bool {
+		r.Filter(func(tg *model.Target) bool {
 			return tg.Service == d.Service && tg.URL.String() == targetURL.String()
 		})
 	}
 
 	// remove all routes without targets
 	for host, routes := range t {
-		var clone Routes
+		var clone model.Routes
 		for _, r := range routes {
 			if len(r.Targets) == 0 {
 				continue
@@ -264,12 +260,12 @@ func (t Table) delRoute(d *RouteDef) error {
 }
 
 // route finds the route for host/path or returns nil if none exists.
-func (t Table) route(host, path string) *Route {
+func (t Table) route(host, path string) *model.Route {
 	routes := t[host]
 	if routes == nil {
 		return nil
 	}
-	return routes.find(path)
+	return routes.Find(path)
 }
 
 // normalizeHost returns the hostname from the request
@@ -429,7 +425,7 @@ func (t Table) config(addWeight bool) []string {
 	var cfg []string
 	for _, host := range hosts {
 		for _, routes := range t[host] {
-			cfg = append(cfg, routes.config(addWeight)...)
+			cfg = append(cfg, routes.Config(addWeight)...)
 		}
 	}
 	return cfg

@@ -19,6 +19,9 @@ import (
 	"github.com/millisecond/olb/exit"
 )
 
+// ServiceRegistry stores the metrics for the services.
+var ServiceRegistry Registry = NoopRegistry{}
+
 // DefaultRegistry stores the metrics library provider.
 var DefaultRegistry Registry = NoopRegistry{}
 

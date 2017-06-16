@@ -1,10 +1,10 @@
-package route
+package model
 
 // Routes stores a list of routes usually for a single host.
 type Routes []*Route
 
 // find returns the route with the given path and returns nil if none was found.
-func (rt Routes) find(path string) *Route {
+func (rt Routes) Find(path string) *Route {
 	for _, r := range rt {
 		if r.Path == path {
 			return r

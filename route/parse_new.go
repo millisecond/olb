@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"github.com/millisecond/olb/model"
 )
 
 var (
@@ -62,8 +63,8 @@ route weight service host/path weight w tags "tag1,tag2"
 // The commands are parsed in order and order matters.
 // Deleting a route that has not been created yet yields
 // a different result than the other way around.
-func Parse(in string) (defs []*RouteDef, err error) {
-	var def *RouteDef
+func Parse(in string) (defs []*model.RouteDef, err error) {
+	var def *model.RouteDef
 	for i, s := range strings.Split(in, "\n") {
 		def, err = nil, nil
 		s = strings.TrimSpace(s)
@@ -91,11 +92,11 @@ func Parse(in string) (defs []*RouteDef, err error) {
 // 1: service 2: src 3: dst 4: weight expr 5: weight val 6: tags expr 7: tags val 8: opts expr 9: opts val
 var reAdd = mustCompileWithFlexibleSpace(`^route add (\S+) (\S+) (\S+)( weight (\S+))?( tags "([^"]*)")?( opts "([^"]*)")?$`)
 
-func parseRouteAdd(s string) (*RouteDef, error) {
+func parseRouteAdd(s string) (*model.RouteDef, error) {
 	if m := reAdd.FindStringSubmatch(s); m != nil {
 		w, err := parseWeight(m[5])
-		return &RouteDef{
-			Cmd:     RouteAddCmd,
+		return &model.RouteDef{
+			Cmd:     model.RouteAddCmd,
 			Service: m[1],
 			Src:     m[2],
 			Dst:     m[3],
@@ -119,15 +120,15 @@ var reDelSvcTags = mustCompileWithFlexibleSpace(`^route del (\S+) tags "([^"]*)"
 // 2: tags
 var reDelTags = mustCompileWithFlexibleSpace(`^route del tags "([^"]*)"$`)
 
-func parseRouteDel(s string) (*RouteDef, error) {
+func parseRouteDel(s string) (*model.RouteDef, error) {
 	if m := reDelSvcTags.FindStringSubmatch(s); m != nil {
-		return &RouteDef{Cmd: RouteDelCmd, Service: m[1], Tags: parseTags(m[2])}, nil
+		return &model.RouteDef{Cmd: model.RouteDelCmd, Service: m[1], Tags: parseTags(m[2])}, nil
 	}
 	if m := reDelTags.FindStringSubmatch(s); m != nil {
-		return &RouteDef{Cmd: RouteDelCmd, Tags: parseTags(m[1])}, nil
+		return &model.RouteDef{Cmd: model.RouteDelCmd, Tags: parseTags(m[1])}, nil
 	}
 	if m := reDel.FindStringSubmatch(s); m != nil {
-		return &RouteDef{Cmd: RouteDelCmd, Service: m[1], Src: m[3], Dst: m[5]}, nil
+		return &model.RouteDef{Cmd: model.RouteDelCmd, Service: m[1], Src: m[3], Dst: m[5]}, nil
 	}
 	return nil, errors.New("syntax error: 'route del' invalid")
 }
@@ -140,11 +141,11 @@ var reWeightSvc = mustCompileWithFlexibleSpace(`^route weight (\S+) (\S+) weight
 // 1: src 2: weight val 3: tags val
 var reWeightSrc = mustCompileWithFlexibleSpace(`^route weight (\S+) weight (\S+) tags "([^"]*)"$`)
 
-func parseRouteWeight(s string) (*RouteDef, error) {
+func parseRouteWeight(s string) (*model.RouteDef, error) {
 	if m := reWeightSvc.FindStringSubmatch(s); m != nil {
 		w, err := parseWeight(m[3])
-		return &RouteDef{
-			Cmd:     RouteWeightCmd,
+		return &model.RouteDef{
+			Cmd:     model.RouteWeightCmd,
 			Service: m[1],
 			Src:     m[2],
 			Weight:  w,
@@ -153,8 +154,8 @@ func parseRouteWeight(s string) (*RouteDef, error) {
 	}
 	if m := reWeightSrc.FindStringSubmatch(s); m != nil {
 		w, err := parseWeight(m[2])
-		return &RouteDef{
-			Cmd:    RouteWeightCmd,
+		return &model.RouteDef{
+			Cmd:    model.RouteWeightCmd,
 			Src:    m[1],
 			Weight: w,
 			Tags:   parseTags(m[3]),

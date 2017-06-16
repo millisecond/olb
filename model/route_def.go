@@ -1,4 +1,4 @@
-package route
+package model
 
 type Cmd string
 
