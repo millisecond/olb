@@ -28,9 +28,6 @@ var defaultConfig = &Config{
 		Prefix:   "{{clean .Hostname}}.{{clean .Exec}}",
 		Names:    "{{clean .Service}}.{{clean .Host}}.{{clean .Path}}.{{clean .TargetURL.Host}}",
 		Interval: 30 * time.Second,
-		Circonus: Circonus{
-			APIApp: "olb",
-		},
 	},
 	Proxy: Proxy{
 		MaxConn:       10000,

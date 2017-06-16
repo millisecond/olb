@@ -17,7 +17,6 @@ It supports ([Full feature list](https://github.com/millisecond/olb/wiki/Feature
   [SSE](https://github.com/millisecond/olb/wiki/Features#sse---server-sent-events)
 * [Dynamic reloading without restart](https://github.com/millisecond/olb/wiki/Features#dynamic-reloading)
 * [Traffic shaping](https://github.com/millisecond/olb/wiki/Features#traffic-shaping) for "blue/green" deployments,
-* [Circonus](https://github.com/millisecond/olb/wiki/Features#metrics-support),
   [Graphite](https://github.com/millisecond/olb/wiki/Features#metrics-support) and
   [StatsD/DataDog](https://github.com/millisecond/olb/wiki/Features#metrics-support) metrics
 * [WebUI](https://github.com/millisecond/olb/wiki/Features#web-ui)

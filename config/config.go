@@ -97,14 +97,6 @@ type Runtime struct {
 	GOMAXPROCS int
 }
 
-type Circonus struct {
-	APIKey   string
-	APIApp   string
-	APIURL   string
-	CheckID  string
-	BrokerID string
-}
-
 type Log struct {
 	AccessFormat string
 	AccessTarget string
@@ -118,7 +110,6 @@ type Metrics struct {
 	Interval     time.Duration
 	GraphiteAddr string
 	StatsDAddr   string
-	Circonus     Circonus
 }
 
 type Registry struct {

@@ -448,41 +448,6 @@ func TestLoad(t *testing.T) {
 			},
 		},
 		{
-			args: []string{"-metrics.circonus.apiapp", "value"},
-			cfg: func(cfg *Config) *Config {
-				cfg.Metrics.Circonus.APIApp = "value"
-				return cfg
-			},
-		},
-		{
-			args: []string{"-metrics.circonus.apikey", "value"},
-			cfg: func(cfg *Config) *Config {
-				cfg.Metrics.Circonus.APIKey = "value"
-				return cfg
-			},
-		},
-		{
-			args: []string{"-metrics.circonus.apiurl", "value"},
-			cfg: func(cfg *Config) *Config {
-				cfg.Metrics.Circonus.APIURL = "value"
-				return cfg
-			},
-		},
-		{
-			args: []string{"-metrics.circonus.brokerid", "value"},
-			cfg: func(cfg *Config) *Config {
-				cfg.Metrics.Circonus.BrokerID = "value"
-				return cfg
-			},
-		},
-		{
-			args: []string{"-metrics.circonus.checkid", "value"},
-			cfg: func(cfg *Config) *Config {
-				cfg.Metrics.Circonus.CheckID = "value"
-				return cfg
-			},
-		},
-		{
 			args: []string{"-runtime.gogc", "555"},
 			cfg: func(cfg *Config) *Config {
 				cfg.Runtime.GOGC = 555
